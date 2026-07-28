@@ -50,11 +50,10 @@
       <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
     </dependency>
 
-    <!-- 阿里云oss组件  -->
+    <!-- 火山引擎 TOS 组件（默认对象存储后端，compile 打包）  -->
     <dependency>
-      <groupId>com.aliyun.oss</groupId>
-      <artifactId>aliyun-sdk-oss</artifactId>
-      <scope>provided</scope> <!-- 当对象存储使用aliyunOSS时，需要改为：compile， 否则使用provided仅用于编译代码 -->
+      <groupId>com.volcengine</groupId>
+      <artifactId>ve-tos-java-sdk</artifactId>
     </dependency>
     <dependency>
         <groupId>jakarta.annotation</groupId>

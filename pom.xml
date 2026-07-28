@@ -163,11 +163,11 @@
             <version>4.38.61.ALL</version>
         </dependency>
 
-        <!-- 阿里云oss组件  -->
+        <!-- 火山引擎 TOS 组件  -->
         <dependency>
-            <groupId>com.aliyun.oss</groupId>
-            <artifactId>aliyun-sdk-oss</artifactId>
-            <version>3.13.0</version>
+            <groupId>com.volcengine</groupId>
+            <artifactId>ve-tos-java-sdk</artifactId>
+            <version>2.6.6</version>
         </dependency>
 
         <!-- 添加对rocketMQ的支持  -->

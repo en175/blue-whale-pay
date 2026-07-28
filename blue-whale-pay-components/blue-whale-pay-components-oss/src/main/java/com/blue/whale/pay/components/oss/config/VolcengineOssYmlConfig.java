@@ -20,20 +20,37 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
-* aliyun oss 的yml配置参数
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/7/12 18:18
-*/
+ * 火山引擎 TOS 的 yml 配置参数（prefix = isys.oss.volcengine-tos）
+ *
+ * @author blue-whale
+ * @date 2026/07/28
+ */
 @Data
 @Component
-@ConfigurationProperties(prefix="isys.oss.aliyun-oss")
-public class AliyunOssYmlConfig {
+@ConfigurationProperties(prefix="isys.oss.volcengine-tos")
+public class VolcengineOssYmlConfig {
 
+	/** endpoint，如 https://tos-cn-beijing.volces.com **/
 	private String endpoint;
+
+	/** region，如 cn-beijing **/
+	private String region;
+
+	/** 公共读桶名（商户图标、接口背景图等） **/
 	private String publicBucketName;
+
+	/** 私有桶名（支付渠道证书等） **/
 	private String privateBucketName;
-	private String accessKeyId;
-	private String accessKeySecret;
+
+	/** AccessKey（生产建议走环境变量注入） **/
+	private String accessKey;
+
+	/** SecretKey（生产建议走环境变量注入） **/
+	private String secretKey;
+
+	/** 公共访问域名，如 https://sweet-oa.tos-cn-beijing.volces.com **/
+	private String domain;
+
+	/** 存储路径前缀，用于在同一桶内隔离业务文件，如 bluewhale-pay **/
+	private String prefix;
 }
