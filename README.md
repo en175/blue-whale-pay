@@ -1,24 +1,18 @@
-# Jeepay UI
+# BlueWhalePay UI
 
-Jeepay 前端项目，包括运营平台、商户系统、聚合码收银台。
+BlueWhalePay 前端项目，包括运营平台、商户系统、聚合码收银台。
 
 三个子项目均采用 **Vue 3** + **Vite** 构建，UI 框架使用 Ant Design Vue（管理端/商户端）。
-
-## 服务端项目
-
-- GitHub：<https://github.com/jeequan/jeepay>
-- Gitee：<https://gitee.com/jeequan/jeepay>
-- GitCode：<https://gitcode.com/jeequantech/jeepay>
 
 ## 目录结构
 
 ```
-jeepay-ui
-├── jeepay-ui-cashier   -- 聚合码收银台（Vue 3 + Vite）
-├── jeepay-ui-manager   -- 运营平台（Vue 3 + Vite + Ant Design Vue 4）
-├── jeepay-ui-merchant  -- 商户系统（Vue 3 + Vite + Ant Design Vue 4）
-├── Dockerfile          -- Docker 统一构建（通过 PLATFORM 参数区分）
-├── default.conf.template -- Nginx 配置模板
+bluewhalepay-ui
+├── bluewhalepay-ui-cashier   -- 聚合码收银台（Vue 3 + Vite）
+├── bluewhalepay-ui-manager   -- 运营平台（Vue 3 + Vite + Ant Design Vue 4）
+├── bluewhalepay-ui-merchant  -- 商户系统（Vue 3 + Vite + Ant Design Vue 4）
+├── Dockerfile                -- Docker 统一构建（通过 PLATFORM 参数区分）
+├── default.conf.template     -- Nginx 配置模板
 └── .dockerignore
 ```
 
@@ -45,7 +39,7 @@ jeepay-ui
 
 ```bash
 # 进入子项目目录
-cd jeepay-ui-manager
+cd bluewhalepay-ui-manager
 
 # 安装依赖
 npm install
@@ -87,26 +81,22 @@ UI 项目通过统一的 `Dockerfile` 构建，使用 `PLATFORM` 参数区分子
 
 ```bash
 # 构建收银台
-docker build . --build-arg PLATFORM=cashier -t jeepay-ui-cashier:latest
+docker build . --build-arg PLATFORM=cashier -t bluewhalepay-ui-cashier:latest
 
 # 构建运营平台
-docker build . --build-arg PLATFORM=manager -t jeepay-ui-manager:latest
+docker build . --build-arg PLATFORM=manager -t bluewhalepay-ui-manager:latest
 
 # 构建商户系统
-docker build . --build-arg PLATFORM=merchant -t jeepay-ui-merchant:latest
+docker build . --build-arg PLATFORM=merchant -t bluewhalepay-ui-merchant:latest
 ```
 
 ### 单独运行
 
 ```bash
-docker run -d -p 9226:80 -e BACKEND_HOST=172.20.0.21:9216 jeepay-ui-cashier:latest
-docker run -d -p 9227:80 -e BACKEND_HOST=172.20.0.22:9217 jeepay-ui-manager:latest
-docker run -d -p 9228:80 -e BACKEND_HOST=172.20.0.23:9218 jeepay-ui-merchant:latest
+docker run -d -p 9226:80 -e BACKEND_HOST=172.20.0.21:9216 bluewhalepay-ui-cashier:latest
+docker run -d -p 9227:80 -e BACKEND_HOST=172.20.0.22:9217 bluewhalepay-ui-manager:latest
+docker run -d -p 9228:80 -e BACKEND_HOST=172.20.0.23:9218 bluewhalepay-ui-merchant:latest
 ```
-
-### 配合 Docker Compose
-
-推荐在 `jeepay` 服务端项目中使用 `docker compose up -d --build` 一键启动全部服务（包含前后端 + 中间件），详见 [jeepay README](https://github.com/jeequan/jeepay)。
 
 ### 默认端口
 
