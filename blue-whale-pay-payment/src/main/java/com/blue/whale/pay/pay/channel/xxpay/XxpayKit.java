@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Slf4j
 public class XxpayKit {
-	
+
 	private static String encodingCharset = "UTF-8";
 
 	/**
@@ -71,7 +71,7 @@ public class XxpayKit {
 			return null;
 		}
 	}
-	
+
 	public static String toHex(byte input[]) {
 		if (input == null) {
 			return null;

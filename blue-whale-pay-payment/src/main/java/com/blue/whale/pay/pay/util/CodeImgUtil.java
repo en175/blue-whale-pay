@@ -265,7 +265,7 @@ public class CodeImgUtil {
      * @throws IOException
      */
     public static String codeImgEncode(String filePath, String fileName, String info, int width, int height) throws WriterException, IOException {
-    	String format="png";
+	    String format="png";
         Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         BitMatrix bitMatrix = new MultiFormatWriter().encode(info,

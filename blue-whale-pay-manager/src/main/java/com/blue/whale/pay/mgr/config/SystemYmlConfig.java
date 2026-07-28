@@ -41,6 +41,3 @@ public class SystemYmlConfig {
 	private Boolean cacheConfig;
 
 }
-
-
-

@@ -4,7 +4,7 @@
 
 > 业务介绍：商户分账主要用于商户将交易成功的资金，按照一定的周期，分账给其他方，可以是合作伙伴、员工、用户或者其他分润方。
 
-参考微信文档： 
+参考微信文档：
 ![](/uploads/jeepay/images/m_59fa8b27a5c30a556210fc3d3bd1ad14_r.png)
 
 
@@ -12,7 +12,7 @@
 支付宝分账： https://opendocs.alipay.com/open/20190308105425129272/intro
 
 
-接口目录： 
+接口目录：
 
 ## 绑定分账用户
 
@@ -30,7 +30,7 @@
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号   
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
 接口代码 | ifCode | 是 | String(10) | wxpay | wxpay-微信官方接口 ; alipay-支付宝官方接口
 接收者账号别名 | receiverAlias | 是 | String(64) | 张三 | 接收者账号别名
@@ -42,10 +42,10 @@
 分账关系类型名称 | relationTypeName | 否 | String(30) | wxpay | 当relationType=CUSTOM 必填
 渠道特殊信息 | channelExtInfo | 否 | String(256) | wxpay | 渠道特殊信息
 默认分账比例 | divisionProfit | 是 | String(10) | wxpay | 若分账30% 则填入 0.3
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳   
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式  
+请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳
+接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
+签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式
 
 
 `请求示例数据`
@@ -66,7 +66,7 @@
 'accName': '张三',
 'relationType': 'OTHERS',
 'relationTypeName': '我的员工',
-'divisionProfit': '0.3' 
+'divisionProfit': '0.3'
 }
 ```
 
@@ -74,10 +74,10 @@
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码  
-返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误  
+返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码
+返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误
 签名信息 | sign | 否 | String(32) | CCD9083A6DAD9A2DA9F668C3D4517A84 | 对data内数据签名,如data为空则不返回
-返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据  
+返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据
 
 `data数据格式`
 
@@ -93,7 +93,7 @@
 渠道特殊信息 | channelExtInfo | 否 | String(256) | wxpay | 渠道特殊信息
 默认分账比例 | divisionProfit | 是 | String(10) | wxpay | 默认分账比例
 绑定成功时间 | bindSuccessTime | 是 | Long | 1622016572190 | 绑定成功时间
-绑定状态 | bindState | 是 | int | 1 | 绑定状态 1-绑定成功, 0-绑定异常 
+绑定状态 | bindState | 是 | int | 1 | 绑定状态 1-绑定成功, 0-绑定异常
 渠道错误码 | errCode | 否 | String | ACQ.PAYMENT_AUTH_CODE_INVALID | 上游渠道返回的错误码
 渠道错误描述 | errMsg | 否 | String | Business Failed 失败 | 上游渠道返回的错误描述
 
@@ -125,7 +125,7 @@
 
 ## 发起订单分账
 
-当订单下单时传入的分账模式  divisionMode = 2商户手动分账(解冻商户金额)，支持商户手动发起订单分账。<br>注意：需要在订单支付完成后（建议1分钟后）调用分账接口。 
+当订单下单时传入的分账模式  divisionMode = 2商户手动分账(解冻商户金额)，支持商户手动发起订单分账。<br>注意：需要在订单支付完成后（建议1分钟后）调用分账接口。
 
 > 接口说明
 
@@ -141,16 +141,16 @@
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-支付订单号 | payOrderId | 否 | String(30) | P20160427210604000490 | 支付中心生成的支付订单号，与mchOrderNo二者传一即可  
-商户单号 | mchOrderNo | 否 | String(30) | 20160427210604000490 | 商户生成的支付单号，与payOrderId二者传一即可  
+支付订单号 | payOrderId | 否 | String(30) | P20160427210604000490 | 支付中心生成的支付订单号，与mchOrderNo二者传一即可
+商户单号 | mchOrderNo | 否 | String(30) | 20160427210604000490 | 商户生成的支付单号，与payOrderId二者传一即可
 是否使用系统配置的自动分账组 | useSysAutoDivisionReceivers | 是 | int | 1 | 是否使用系统配置的自动分账组： 0-否 1-是
 分账接收者账号列表 | receivers | 否 | String(512) | [] |  接收者账号列表（JSONArray 转换为字符串类型）<br/>仅当useSysAutoDivisionReceivers=0 时该字段值有效。<br/>参考：<br/>方式1： 按账号纬度<br/>[{<br/>receiverId: 800001,<br/>divisionProfit: 0.1 (若不填入则使用系统默认配置值)<br/>}]<br/>方式2： 按组纬度<br/>[{<br/>receiverGroupId: 100001, (该组所有 当前订单的渠道账号并且可用状态的全部参与分账)<br/>divisionProfit: 0.1 (每个账号的分账比例， 若不填入则使用系统默认配置值， 建议不填写)<br/>}]
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式 
+请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳
+接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
+签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式
 
 `请求示例数据`
 
@@ -164,16 +164,16 @@
 'appId': '60cc3ba74ee0e6685f57eb1e',
 'payOrderId': 'P202108271011463510002',
 'useSysAutoDivisionReceivers': '0',
-'receivers': '[{"receiverGroupId":"","receiverId":"800029","divisionProfit":"0.0001"},{"receiverGroupId":"","receiverId":"800028","divisionProfit":"0.0002"}]' 
+'receivers': '[{"receiverGroupId":"","receiverId":"800029","divisionProfit":"0.0001"},{"receiverGroupId":"","receiverId":"800028","divisionProfit":"0.0002"}]'
 }
 ```
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码  
-返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误  
+返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码
+返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误
 签名信息 | sign | 否 | String(32) | CCD9083A6DAD9A2DA9F668C3D4517A84 | 对data内数据签名,如data为空则不返回
-返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据  
+返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据
 
 `data数据格式`
 

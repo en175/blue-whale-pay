@@ -37,6 +37,3 @@ public class AliyunOssYmlConfig {
 	private String accessKeyId;
 	private String accessKeySecret;
 }
-
-
-

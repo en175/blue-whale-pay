@@ -57,7 +57,7 @@ public class BizExceptionResolver implements HandlerExceptionResolver {
 
 		//业务异常
         if(ex instanceof BizException) {
-        	logger.error("公共捕捉[Biz]异常：{}",ex.getMessage());
+	        logger.error("公共捕捉[Biz]异常：{}",ex.getMessage());
 			outPutJson = ((BizException) ex).getApiRes().toJSONString();
         }else if(ex instanceof DataAccessException){
 			logger.error("公共捕捉[DataAccessException]异常：",ex);
@@ -71,12 +71,12 @@ public class BizExceptionResolver implements HandlerExceptionResolver {
 		}
 
         try {
-	   			this.outPutJson(response, outPutJson);
-   		} catch (IOException e) {
-   			logger.error("输出错误信息异常:", e);
-   		}
+				   this.outPutJson(response, outPutJson);
+		   } catch (IOException e) {
+			   logger.error("输出错误信息异常:", e);
+		   }
 
-   		return new ModelAndView();
+		   return new ModelAndView();
 	}
 
 

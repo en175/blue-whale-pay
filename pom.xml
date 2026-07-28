@@ -25,8 +25,8 @@
     <module>blue-whale-pay-core</module>  <!-- 基础函数, 包含工具类等 -->
     <module>blue-whale-pay-service</module>  <!-- db service等 -->
 
-  	<module>blue-whale-pay-manager</module>	<!-- 运营平台管理端 -->
-  	<module>blue-whale-pay-merchant</module>	<!-- 商户平台管理端 -->
+	  <module>blue-whale-pay-manager</module>	<!-- 运营平台管理端 -->
+	  <module>blue-whale-pay-merchant</module>	<!-- 商户平台管理端 -->
     <module>blue-whale-pay-payment</module>	<!-- 支付统一网关 -->
 
     <module>blue-whale-pay-components</module> <!-- 组件包 -->

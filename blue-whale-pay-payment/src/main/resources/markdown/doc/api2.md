@@ -18,25 +18,25 @@
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号   
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号  
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号
 支付方式 | wayCode | 是 | String(30) | WX_LITE | 支付方式,如微信小程序WX_LITE
-支付金额 | amount | 是 | int | 100 | 支付金额,单位分  
-货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny  
-客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址  
-商品标题 | subject | 是 | String(64) | Jeepay商品标题测试 | 商品标题  
-商品描述 | body | 是 | String(256) | Jeepay商品描述测试 | 商品描述  
-异步通知地址 | notifyUrl | 否 | String(128) | https://www.jeequan.com/notify.htm | 支付结果异步回调URL,只有传了该值才会发起回调  
+支付金额 | amount | 是 | int | 100 | 支付金额,单位分
+货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny
+客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址
+商品标题 | subject | 是 | String(64) | Jeepay商品标题测试 | 商品标题
+商品描述 | body | 是 | String(256) | Jeepay商品描述测试 | 商品描述
+异步通知地址 | notifyUrl | 否 | String(128) | https://www.jeequan.com/notify.htm | 支付结果异步回调URL,只有传了该值才会发起回调
 跳转通知地址 | returnUrl | 否 | String(128) | https://www.jeequan.com/return.htm | 支付结果同步跳转通知URL
-失效时间 | expiredTime | 否 | int | 3600 | 订单失效时间,单位秒,默认2小时.订单在(创建时间+失效时间)后失效   
-渠道参数 | channelExtra | 否 | String(256 | {"auth_code", "13920933111042"} | 特定渠道发起的额外参数,json格式字符串.详见渠道参数说明  
-分账模式 | divisionMode | 否 | int | 0 | 分账模式： 0-该笔订单不允许分账[默认], 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)  
-扩展参数 | extParam | 否 | String(512) | 134586944573118714 | 商户扩展参数,回调时会原样返回  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳   
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式  
+失效时间 | expiredTime | 否 | int | 3600 | 订单失效时间,单位秒,默认2小时.订单在(创建时间+失效时间)后失效
+渠道参数 | channelExtra | 否 | String(256 | {"auth_code", "13920933111042"} | 特定渠道发起的额外参数,json格式字符串.详见渠道参数说明
+分账模式 | divisionMode | 否 | int | 0 | 分账模式： 0-该笔订单不允许分账[默认], 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)
+扩展参数 | extParam | 否 | String(512) | 134586944573118714 | 商户扩展参数,回调时会原样返回
+请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳
+接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
+签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式
 
 
 `请求示例数据`
@@ -68,20 +68,20 @@
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码  
-返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误  
+返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码
+返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误
 签名信息 | sign | 否 | String(32) | CCD9083A6DAD9A2DA9F668C3D4517A84 | 对data内数据签名,如data为空则不返回
-返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据  
+返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据
 
 `data数据格式`
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-支付订单号 | payOrderId | 是 | String(30) | U12021022311124442600 | 返回支付系统订单号  
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号  
-订单状态 | orderState | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭  
-支付数据类型 | payDataType | 是 | String | payUrl | 支付参数类型<br>payUrl-跳转链接的方式<br>form-表单方式<br>wxapp-微信支付参数(微信公众号,小程序,app支付时)<br>aliapp-支付宝app支付参数<br>ysfapp-云闪付app支付参数<br>codeUrl-二维码地址<br>codeImgUrl-二维码图片地址<br>none-空支付参数 
-支付数据 | payData | 否 | String | http://www.jeequan.com/pay.html | 发起支付用到的支付参数，如果微信公众号支付等 
+支付订单号 | payOrderId | 是 | String(30) | U12021022311124442600 | 返回支付系统订单号
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号
+订单状态 | orderState | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭
+支付数据类型 | payDataType | 是 | String | payUrl | 支付参数类型<br>payUrl-跳转链接的方式<br>form-表单方式<br>wxapp-微信支付参数(微信公众号,小程序,app支付时)<br>aliapp-支付宝app支付参数<br>ysfapp-云闪付app支付参数<br>codeUrl-二维码地址<br>codeImgUrl-二维码图片地址<br>none-空支付参数
+支付数据 | payData | 否 | String | http://www.jeequan.com/pay.html | 发起支付用到的支付参数，如果微信公众号支付等
 渠道错误码 | errCode | 否 | String | ACQ.PAYMENT_AUTH_CODE_INVALID | 上游渠道返回的错误码
 渠道错误描述 | errMsg | 否 | String | Business Failed 失败 | 上游渠道返回的错误描述
 
@@ -104,24 +104,24 @@
 
 > 支付方式
 
-WayCode | 支付方式 
-------- | ------- 
-QR_CASHIER | 聚合扫码(用户扫商家) 
-AUTO_BAR | 聚合条码(商家扫用户) 
-ALI_BAR | 支付宝条码 
+WayCode | 支付方式
+------- | -------
+QR_CASHIER | 聚合扫码(用户扫商家)
+AUTO_BAR | 聚合条码(商家扫用户)
+ALI_BAR | 支付宝条码
 ALI_JSAPI | 支付宝生活号
-ALI_APP | 支付宝APP 
-ALI_WAP | 支付宝WAP 
-ALI_PC | 支付宝PC网站 
-ALI_QR | 支付宝二维码 
+ALI_APP | 支付宝APP
+ALI_WAP | 支付宝WAP
+ALI_PC | 支付宝PC网站
+ALI_QR | 支付宝二维码
 WX_BAR | 微信条码
-WX_JSAPI | 微信公众号 
-WX_LITE | 微信小程序 
-WX_APP | 微信APP 
-WX_H5 | 微信H5 
+WX_JSAPI | 微信公众号
+WX_LITE | 微信小程序
+WX_APP | 微信APP
+WX_H5 | 微信H5
 WX_NATIVE | 微信扫码
-YSF_BAR | 云闪付条码 
-YSF_JSAPI | 云闪付jsapi 
+YSF_BAR | 云闪付条码
+YSF_JSAPI | 云闪付jsapi
 
 > channelExtra参数说明
 
@@ -174,14 +174,14 @@ YSF_JSAPI | 云闪付jsapi
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-支付订单号 | payOrderId | 是 | String(30) | P20160427210604000490 | 支付中心生成的订单号，与mchOrderNo二者传一即可  
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号，与payOrderId二者传一即可  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式 
+支付订单号 | payOrderId | 是 | String(30) | P20160427210604000490 | 支付中心生成的订单号，与mchOrderNo二者传一即可
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号，与payOrderId二者传一即可
+请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳
+接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
+签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式
 
 `请求示例数据`
 
@@ -199,33 +199,33 @@ YSF_JSAPI | 云闪付jsapi
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码  
-返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误  
+返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码
+返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误
 签名信息 | sign | 否 | String(32) | CCD9083A6DAD9A2DA9F668C3D4517A84 | 对data内数据签名,如data为空则不返回
-返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据  
+返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据
 
 `data数据格式`
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
 支付订单号 | payOrderId | 是 | String(30) | P12021022311124442600 | 返回支付系统订单号
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号   
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号  
-支付接口 | ifCode | 是 | String(30) | wxpay | 支付接口编码   
-支付方式 | wayCode | 是 | String(30) | WX_LITE | 支付方式,如微信小程序WX_LITE   
-支付金额 | amount | 是 | int | 100 | 支付金额,单位分  
-货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny  
-订单状态 | state | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭  
-客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址  
-商品标题 | subject | 是 | String(64) | Jeepay商品标题测试 | 商品标题  
-商品描述 | body | 是 | String(256) | Jeepay商品描述测试 | 商品描述  
-渠道订单号 | channelOrderNo | 否 | String | 20160427210604000490 | 对应渠道的订单号  
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号
+支付接口 | ifCode | 是 | String(30) | wxpay | 支付接口编码
+支付方式 | wayCode | 是 | String(30) | WX_LITE | 支付方式,如微信小程序WX_LITE
+支付金额 | amount | 是 | int | 100 | 支付金额,单位分
+货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny
+订单状态 | state | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭
+客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址
+商品标题 | subject | 是 | String(64) | Jeepay商品标题测试 | 商品标题
+商品描述 | body | 是 | String(256) | Jeepay商品描述测试 | 商品描述
+渠道订单号 | channelOrderNo | 否 | String | 20160427210604000490 | 对应渠道的订单号
 渠道错误码 | errCode | 否 | String | 1002 | 渠道下单返回错误码
 渠道错误描述 | errMsg | 否 | String | 业务异常错误 | 渠道下单返回错误描述
-扩展参数 | extParam | 否 | String(512) | 134586944573118714 | 商户扩展参数,回调时会原样返回  
-创建时间 | createdAt | 是 | long | 1622016572190 | 订单创建时间,13位时间戳  
-成功时间 | successTime | 否 | long | 1622016572190 | 订单支付成功时间,13位时间戳  
+扩展参数 | extParam | 否 | String(512) | 134586944573118714 | 商户扩展参数,回调时会原样返回
+创建时间 | createdAt | 是 | long | 1622016572190 | 订单创建时间,13位时间戳
+成功时间 | successTime | 否 | long | 1622016572190 | 订单支付成功时间,13位时间戳
 
 `返回示例数据`
 
@@ -273,14 +273,14 @@ YSF_JSAPI | 云闪付jsapi
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-支付订单号 | payOrderId | 是 | String(30) | P20160427210604000490 | 支付中心生成的订单号，与mchOrderNo二者传一即可  
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号，与payOrderId二者传一即可  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式 
+支付订单号 | payOrderId | 是 | String(30) | P20160427210604000490 | 支付中心生成的订单号，与mchOrderNo二者传一即可
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号，与payOrderId二者传一即可
+请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳
+接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
+签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式
 
 `请求示例数据`
 
@@ -298,10 +298,10 @@ YSF_JSAPI | 云闪付jsapi
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码  
-返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误  
+返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码
+返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误
 签名信息 | sign | 否 | String(32) | CCD9083A6DAD9A2DA9F668C3D4517A84 | 对data内数据签名,如data为空则不返回
-返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据  
+返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据
 
 `data数据格式`
 
@@ -343,25 +343,25 @@ YSF_JSAPI | 云闪付jsapi
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
 支付订单号 | payOrderId | 是 | String(30) | P12021022311124442600 | 返回支付系统订单号
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号   
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号  
-支付接口 | ifCode | 是 | String(30) | wxpay | 支付接口编码   
-支付方式 | wayCode | 是 | String(30) | WX_LITE | 支付方式,微信小程序WX_LITE   
-支付金额 | amount | 是 | int | 100 | 支付金额,单位分  
-货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny  
-订单状态 | state | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭  
-客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址  
-商品标题 | subject | 是 | String(64) | Jeepay商品标题测试 | 商品标题  
-商品描述 | body | 是 | String(256) | Jeepay商品描述测试 | 商品描述  
-渠道订单号 | channelOrderNo | 否 | String | 20160427210604000490 | 对应渠道的订单号  
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号
+支付接口 | ifCode | 是 | String(30) | wxpay | 支付接口编码
+支付方式 | wayCode | 是 | String(30) | WX_LITE | 支付方式,微信小程序WX_LITE
+支付金额 | amount | 是 | int | 100 | 支付金额,单位分
+货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny
+订单状态 | state | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭
+客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址
+商品标题 | subject | 是 | String(64) | Jeepay商品标题测试 | 商品标题
+商品描述 | body | 是 | String(256) | Jeepay商品描述测试 | 商品描述
+渠道订单号 | channelOrderNo | 否 | String | 20160427210604000490 | 对应渠道的订单号
 渠道错误码 | errCode | 否 | String | 1002 | 渠道下单返回错误码
 渠道错误描述 | errMsg | 否 | String | 134586944573118714 | 渠道下单返回错误描述
 扩展参数 | extParam | 否 | String(512) | 134586944573118714 | 商户扩展参数
-创建时间 | createdAt | 是 | long | 1622016572190 | 订单创建时间,13位时间戳  
-成功时间 | successTime | 否 | long | 1622016572190 | 订单支付成功时间,13位时间戳  
-通知请求时间 | reqTime | 是 | String(30) | 1622016572190 | 通知请求时间，,13位时间戳  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
+创建时间 | createdAt | 是 | long | 1622016572190 | 订单创建时间,13位时间戳
+成功时间 | successTime | 否 | long | 1622016572190 | 订单支付成功时间,13位时间戳
+通知请求时间 | reqTime | 是 | String(30) | 1622016572190 | 通知请求时间，,13位时间戳
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
 
 &gt; 返回结果
 
@@ -409,14 +409,14 @@ YSF_JSAPI | 云闪付jsapi
 
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
+商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号
 应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-支付接口 | ifCode | 是 | String(30) | AUTO | 目前只支持传 AUTO   
-跳转地址 | redirectUrl | 是 | String | https://www.jeequan.com | 获取到用户ID后，会携带用户ID参数跳转到该地址  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式 
+支付接口 | ifCode | 是 | String(30) | AUTO | 目前只支持传 AUTO
+跳转地址 | redirectUrl | 是 | String | https://www.jeequan.com | 获取到用户ID后，会携带用户ID参数跳转到该地址
+请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳
+接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0
+签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法
+签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式
 
 `请求示例数据`
 
@@ -447,7 +447,7 @@ https://www.jeequan.com/toU?channelUserId=o6BcIwvSiRpfS8e_UyfQNrYuk2LI
 
 ## 返回码
 
-code | 描述 
+code | 描述
 ------- | -------
-0 | 成功 
+0 | 成功
 9999 | 异常，具体错误详见msg字段
