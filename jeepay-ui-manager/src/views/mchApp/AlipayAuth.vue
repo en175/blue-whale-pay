@@ -34,7 +34,7 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
     appId: '',
     apiResData: {}
   })
-  
+
   function show (appId) { // 弹层打开事件
     vdata.apiResData = {}
     vdata.appId = appId

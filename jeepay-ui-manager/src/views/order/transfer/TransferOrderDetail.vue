@@ -201,7 +201,7 @@
         </a-descriptions>
       </a-col>
     </a-row>
-    
+
     <a-divider />
     <a-col :sm="12">
       <a-descriptions>

@@ -102,7 +102,7 @@
 }
 
 .paydemo #paydemo-amount {
-  display: flex; 
+  display: flex;
   align-items: inherit;
 }
 .paydemo #paydemo-amount .layui-unselect{

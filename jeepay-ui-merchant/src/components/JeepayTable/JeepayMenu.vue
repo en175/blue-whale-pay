@@ -20,7 +20,7 @@
   &::-webkit-scrollbar {
     width: 5px;
     height: 3px;
- 
+
   }
   &::-webkit-scrollbar-thumb{
     background-color: rgba(0, 0, 0, 0.2);

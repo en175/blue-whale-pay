@@ -16,15 +16,15 @@ export function throttle(fn,interval,option) {
   var last = 0
   var timer = null
   if(!option) option = {}
-  
+
   var trailing = option.trailing||false
   var result = option.result||null
-  
+
   var handleFn = function () {
   //this和argument
   var _this=this
   var _arguments=arguments
-  
+
   var now= new Date().getTime()
   if(now-last>interval){
     if(timer){
@@ -40,12 +40,12 @@ export function throttle(fn,interval,option) {
       },interval)
     }
   }
-  
+
   handleFn.cancel = function(){
     clearTimeout(timer)
     timer = null
   }
-  
+
   function callFn(context, argument){
     var res= fn.apply(context,argument)
     if(result){

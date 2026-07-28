@@ -29,7 +29,7 @@ export function getInfo () {
   })
 }
 
-// 获取到 网站标题等信息 
+// 获取到 网站标题等信息
 export function getSiteInfo () {
   return request.request({
     url: '/api/auth/siteTitle',

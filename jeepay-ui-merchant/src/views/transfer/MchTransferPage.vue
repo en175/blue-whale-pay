@@ -330,7 +330,7 @@ function immediatelyPay() {
 
           $infoBox.modalWarning('转账处理中', <div>请前往转账订单列表查看最终状态</div>)
         }
-        
+
       } else if (apiRes.state === 3) {
         $infoBox.modalError(
           '转账处理失败',
