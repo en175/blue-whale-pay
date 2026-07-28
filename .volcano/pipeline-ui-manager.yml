@@ -1,0 +1,47 @@
+# 火山流水线：bluewhalepay-ui-manager 镜像构建推送
+# 手动触发 | Gitee 拉取 → Vite 构建 → Nginx 运行 → 推送火山镜像仓库
+# 通过 --build-arg PLATFORM=manager 区分三个前端平台
+version: 2.0.0
+agentPool: public/prod-v2-public
+sources:
+  - name: blue-whale-ai
+    type: Gitee
+    url: https://gitee.com/hangzhou-xuanfu_1/blue-whale-ai.git
+    branch: master
+    credential:
+      type: serviceConnection
+      serviceConnectionId: mP4MRy5qE1e98DF3NOey
+stages:
+  - stage: stage-docker-push
+    displayName: 镜像构建推送
+    tasks:
+      - task: build-image-and-push-to-registry
+        displayName: ui-manager 镜像构建推送
+        timeout: 1h
+        steps:
+          - step: buildkit-cr
+            displayName: ui-manager 镜像构建推送
+            component: buildkit-cr@5.0.0
+            inputs:
+              contextPath: blue_whale_pay_web
+              dockerfiles:
+                default:
+                  path: blue_whale_pay_web/Dockerfile
+              namespace: blue-whale
+              region: cn-beijing
+              registryInstance: blue-whale
+              registryMirrors:
+                - https://dockerhub.volces.com
+              repo: blue_whale_pay_ui_manager
+              tag: latest
+              buildArgs:
+                - PLATFORM=manager
+              # 运行时通过 -e BACKEND_HOST=xxx:9217 指定后端地址
+        outputs:
+          - imageOutput_buildkit-cr
+        resourcesPolicy: all
+        resources:
+          limits:
+            cpu: 2C
+            memory: 4Gi
+        dependsOn: []
