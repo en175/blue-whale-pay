@@ -4,7 +4,9 @@ server {
     server_name localhost;
     root        /workspace/;
 
-    try_files $uri $uri/ /index.html;
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
 
     location /api/ {
         proxy_next_upstream http_502 http_504 error timeout invalid_header;
