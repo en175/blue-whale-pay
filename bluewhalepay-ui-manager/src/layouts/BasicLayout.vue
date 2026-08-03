@@ -20,7 +20,7 @@
       <router-link :to="{ path: '/' }" style="display: flex; align-items: center">
         <div v-if="!proLayoutObject.collapsed" style="display: flex; align-items: center; gap: 8px">
           <img
-            src="https://bluewhale-assets.tos-cn-beijing.volces.com/blue-whale-api/favicon.ico"
+            src="https://bluewhale-assets.tos-cn-beijing.volces.com/blue-whale-api/blue_whale.svg"
             alt="BlueWhalePay"
             style="width: 40px; height: 40px"
           />
@@ -28,7 +28,7 @@
         </div>
         <div v-else>
           <img
-            src="https://bluewhale-assets.tos-cn-beijing.volces.com/blue-whale-api/favicon.ico"
+            src="https://bluewhale-assets.tos-cn-beijing.volces.com/blue-whale-api/blue_whale.svg"
             alt="BlueWhalePay"
             style="width: 40px; height: 40px"
           />

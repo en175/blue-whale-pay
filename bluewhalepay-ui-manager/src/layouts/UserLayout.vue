@@ -6,7 +6,7 @@
         <div class="top">
           <div class="header">
             <a href="/">
-              <img src="~@/assets/logo.svg" class="logo" alt="logo" />
+              <img src="https://bluewhale-assets.tos-cn-beijing.volces.com/blue-whale-api/blue_whale.svg" class="logo" alt="logo" />
             </a>
           </div>
           <div class="desc">
