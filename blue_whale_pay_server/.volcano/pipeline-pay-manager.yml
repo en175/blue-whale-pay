@@ -1,0 +1,46 @@
+# 火山流水线：blue-whale-pay-manager 镜像构建推送
+# 手动触发 | Gitee 拉取 → Maven 多阶段编译 → 推送火山镜像仓库
+version: 2.0.0
+agentPool: public/prod-v2-public
+sources:
+  - name: blue-whale-ai
+    type: Gitee
+    url: https://gitee.com/hangzhou-xuanfu_1/blue-whale-ai.git
+    branch: master
+    credential:
+      type: serviceConnection
+      serviceConnectionId: mP4MRy5qE1e98DF3NOey
+stages:
+  - stage: stage-docker-push
+    displayName: 镜像构建推送
+    tasks:
+      - task: build-image-and-push-to-registry
+        displayName: pay-manager 镜像构建推送
+        timeout: 2h
+        steps:
+          - step: buildkit-cr
+            displayName: pay-manager 镜像构建推送
+            component: buildkit-cr@5.0.0
+            inputs:
+              contextPath: blue_whale_pay_server
+              dockerfiles:
+                default:
+                  path: blue_whale_pay_server/blue-whale-pay-manager/Dockerfile
+              namespace: blue-whale
+              region: cn-beijing
+              registryInstance: blue-whale
+              registryMirrors:
+                - https://dockerhub.volces.com
+              repo: blue_whale_pay_manager
+              tag: latest
+              # 如需动态 tag（推荐），在火山控制台添加环境变量后改为：
+              # tag: $(date +%Y%m%d)-${CI_COMMIT_SHORT_SHA},latest
+              # 火山 buildkit-cr 组件 tag 字段支持逗号分隔多 tag
+        outputs:
+          - imageOutput_buildkit-cr
+        resourcesPolicy: all
+        resources:
+          limits:
+            cpu: 4C
+            memory: 8Gi
+        dependsOn: []
