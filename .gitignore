@@ -1,0 +1,107 @@
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# MCP
+.mcp.json
+
+# 本地私人 Agent 配置（勿入库）
+CLAUDE.local.md
+AGENTS.local.md
+.codex/*
+!.codex/
+!.codex/hooks.json
+!.codex/hooks/
+.codex/hooks/*
+!.codex/hooks/run-claude-pretool.sh
+.codex/config.toml
+.agents/skills/
+
+# Graphify 本地产物，整个不入库（各 worktree / clone 各自生成或共享）
+graphify-out/
+.codebase-memory/
+
+# 运行时生成物（asset 转存的 mp4/图片）
+data/
+
+# OpenSpec 规划文档（入库共享，规格驱动开发）
+openspec-frontend/
+
+# agent 本地参考文档（视频/图片生成 API、todos 等，不入库；注意是 docs/agent 单数，勿与 docs/agents 团队文档混淆）
+docs/agent/
+
+# Node / 前端
+node_modules/
+.next/
+.worker-dist/
+next-env.d.ts
+*.tsbuildinfo
+
+# 本地说明文档（agent 生成的流程说明，不进仓）
+blue-whale-agent-workspace/Description file/
+
+# superpowers 本地产物（plans 等，不进仓）
+docs/superpowers/
+# Playwright 产物（IJZYVT）
+test-results/
+playwright-report/
+.playwright/
+blob-report/
+playwright/.cache/
+
+# superpowers 本地产物（plans 等，不进仓）
+docs/superpowers/
+
+# Java / Maven
+target/
+*.class
+
+# 环境变量（凭据不入库）
+.env
+
+# 运行日志
+logs/
+!blue_whale_web/app/admin/logs/
+
+# mitmproxy 抓包产物（本地工具，不入库）
+mitm_mcp_traffic.db
+*.flow
+*.flow
+blue_whale_web/node_modules
+
+# Python 缓存（hook 脚本运行产物）
+__pycache__/
+*.pyc
+
+# 本地私人配置（kimi CLI 等，勿入库）
+.kimi-code/*
+!.kimi-code/
+!.kimi-code/hooks.toml
+!.kimi-code/hooks/
+.kimi-code/hooks/*
+!.kimi-code/hooks/blue-whale-hook.sh
+.kimi-code/local.toml
+
+# SDD 运行时 scratch（progress ledger/task reports），不进仓；.superpowers/skills/ 是 tracked 技能文件
+.superpowers/sdd/
+
+# Python 构建产物与虚拟环境（本地运行/测试生成，不入库）
+*.egg-info/
+build/
+dist/
+.eggs/
+*.py[cod]
+.venv/
+
+# zcode 本地产物（plans 等，不进仓）
+.zcode/plans/
+
+blue_whale_pay_server/conf/**/application-localremote.yml
+blue_whale_pay_server/conf/tos-local.env
+
+# Qoder CLI 本地个人配置（团队共享 .qoder/ 入库，仅忽略个人覆盖与本地会话数据）
+.qoder/settings.local.json
+.qoder/sessions/
