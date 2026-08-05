@@ -1,0 +1,153 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/block-master-edit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/cbm-discovery-gate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/block-dangerous-git.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/block-push-to-master.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__create_enterprise_repo_pull",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__merge_enterprise_pull",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__create_enterprise_repo_release",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__create_enterprise_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/block-issue-without-repo.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__update_enterprise_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/block-issue-without-repo.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/remind-issue-state.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__create_enterprise_repo_pull",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/remind-issue-state.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__merge_enterprise_pull",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/remind-issue-state.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__gitee-ent__create_enterprise_repo_release",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/confirm-release-action.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/cbm-session-reminder.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "startup|clear|compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$QODER_PROJECT_DIR\"/.qoder/hooks/superpowers-session-start.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "outputStyle": "ADHD"
+}

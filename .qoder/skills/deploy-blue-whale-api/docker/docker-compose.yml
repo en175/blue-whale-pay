@@ -1,0 +1,22 @@
+# blue_whale_api (new-api) 部署 compose。scp 到 /opt/blue-whale-api/docker-compose.yml。
+# 容器内 3000，宿主映射 3001（避 blue_whale_web 3000 撞车）。
+# .env 由 push.sh 远程生成（含 SQL_DSN/REDIS_CONN_STRING/SESSION_SECRET，chmod 600）。
+services:
+  blue-whale-api:
+    build: .
+    image: blue-whale-api:latest
+    container_name: blue-whale-api
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Shanghai
+      # 测试服放宽登录等关键接口限流（默认 20 次/20 分钟，多人联调会 429）。
+      # 生产环境应在生产 compose 单独配置更严格的值，而非继承此文件。
+      - CRITICAL_RATE_LIMIT=2000
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    command: --log-dir /app/logs
