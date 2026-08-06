@@ -127,6 +127,18 @@ isys:
       domain: ${TOS_DOMAIN:https://sweet-oa.tos-cn-beijing.volces.com}  #公共访问域名
       prefix: ${TOS_PREFIX:bluewhale-pay}  #存储路径前缀，同桶内隔离业务文件
 
+  #火山引擎TLS日志上报（应用日志直采; 字段Schema与blue-whale-api严格一致: level/time/container/env/version/trace_id/caller/func/message）
+  #凭证不完整时 TlsLogAppender 自动跳过上报, 仅保留本地日志
+  tls:
+    endpoint: ${TLS_ENDPOINT:https://tls-cn-beijing.volces.com}  #公网端点（SDK需带https://前缀）
+    region: ${TLS_REGION:cn-beijing}  #区域（必填，缺省会报Empty Region）
+    topic-id: ${TLS_TOPIC_ID:}  #日志主题ID
+    access-key: ${TLS_AK:}   #AccessKey（环境变量注入，勿写死明文）
+    secret-key: ${TLS_SK:}   #SecretKey（环境变量注入，原样使用勿Base64解码）
+    container: ${CONTAINER_NAME:blue-whale-pay}  #容器/服务名，跨系统区分服务
+    env: ${ENV:dev}  #环境标识
+    version: ${TLS_VERSION:}  #服务版本（部署时可注入）
+
   mq:
     vender: rocketMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【blue-whale-pay-components-mq项目下pom.xml中的依赖包】。
 

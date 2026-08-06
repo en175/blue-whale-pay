@@ -68,6 +68,26 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- aspectj: TraceIdAspect 编译需要, 运行时由各服务模块的 spring-boot-starter-aop 提供 -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- 火山引擎日志服务 TLS SDK: TlsLogAppender 运行需要 -->
+    <dependency>
+      <groupId>com.volcengine</groupId>
+      <artifactId>volc-sdk-java</artifactId>
+    </dependency>
+
+    <!-- logback-classic: TlsLogAppender 编译需要, 运行时由各服务模块提供 -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- alibaba FastJSON -->
     <dependency>
       <groupId>com.alibaba</groupId>

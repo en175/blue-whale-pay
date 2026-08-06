@@ -17,6 +17,7 @@ package com.blue.whale.pay.pay.channel.ysfpay.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.blue.whale.pay.core.constants.CS;
+import com.blue.whale.pay.core.utils.TraceIdKit;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.net.ssl.*;
@@ -222,6 +223,9 @@ public class YsfHttpUtil {
 			https.setConnectTimeout(DEFAULT_TIMEOUT);
 			https.setReadTimeout(DEFAULT_TIMEOUT);
 
+			//链路标识透传： 出站请求自动携带 X-Trace-Id (云闪付使用原生 HttpURLConnection, 无全局拦截器可用, 故在此单点接入)
+			https.setRequestProperty(TraceIdKit.TRACE_ID_HEADER, TraceIdKit.getOrGenerate());
+
 			return https;
 		} else {
 			HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
@@ -232,6 +236,9 @@ public class YsfHttpUtil {
 
 			http.setConnectTimeout(DEFAULT_TIMEOUT);
 			http.setReadTimeout(DEFAULT_TIMEOUT);
+
+			//链路标识透传： 出站请求自动携带 X-Trace-Id (云闪付使用原生 HttpURLConnection, 无全局拦截器可用, 故在此单点接入)
+			http.setRequestProperty(TraceIdKit.TRACE_ID_HEADER, TraceIdKit.getOrGenerate());
 
 			return http;
 		}

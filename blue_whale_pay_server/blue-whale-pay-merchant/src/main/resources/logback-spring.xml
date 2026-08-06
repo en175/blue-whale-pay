@@ -10,10 +10,20 @@
     <!-- 项目配置， 如修改包名，请搜索并全部替换掉  -->
     <springProperty scope="context" name="currentProjectLevel" source="logging.level.com.blue.whale.pay"/>
 
+    <!-- 火山引擎TLS日志上报参数（读取 application.yml 的 isys.tls; 凭证不全时 TlsLogAppender 自动跳过上报） -->
+    <springProperty scope="context" name="tlsEndpoint" source="isys.tls.endpoint" defaultValue=""/>
+    <springProperty scope="context" name="tlsRegion" source="isys.tls.region" defaultValue=""/>
+    <springProperty scope="context" name="tlsTopicId" source="isys.tls.topic-id" defaultValue=""/>
+    <springProperty scope="context" name="tlsAccessKey" source="isys.tls.access-key" defaultValue=""/>
+    <springProperty scope="context" name="tlsSecretKey" source="isys.tls.secret-key" defaultValue=""/>
+    <springProperty scope="context" name="tlsContainer" source="isys.tls.container" defaultValue="blue-whale-pay"/>
+    <springProperty scope="context" name="tlsEnv" source="isys.tls.env" defaultValue="dev"/>
+    <springProperty scope="context" name="tlsVersion" source="isys.tls.version" defaultValue=""/>
+
     <!-- 日志文件名称  logback属性 -->
     <property name="currentLoggerFileName" value="mch" />
-    <!-- 日志格式, 参考：https://logback.qos.ch/manual/layouts.html -->
-    <property name="currentLoggerPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%logger{15}] - %msg%n" />
+    <!-- 日志格式, 参考：https://logback.qos.ch/manual/layouts.html ； [%X{trace_id}] 为跨系统链路标识（见 TraceIdFilter） -->
+    <property name="currentLoggerPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{trace_id}] [%logger{15}] - %msg%n" />
 
     <!-- appender： 控制台日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -56,11 +66,24 @@
         </filter>
     </appender>
 
+    <!-- appender：火山引擎TLS日志上报（字段Schema与blue-whale-api严格一致, 含caller/func） -->
+    <appender name="TLS" class="com.blue.whale.pay.core.logging.TlsLogAppender">
+        <endpoint>${tlsEndpoint}</endpoint>
+        <region>${tlsRegion}</region>
+        <topicId>${tlsTopicId}</topicId>
+        <accessKey>${tlsAccessKey}</accessKey>
+        <secretKey>${tlsSecretKey}</secretKey>
+        <container>${tlsContainer}</container>
+        <env>${tlsEnv}</env>
+        <version>${tlsVersion}</version>
+    </appender>
+
     <!-- 主日志级别配置 -->
     <root level="${currentRootLevel}">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="ALL_FILE" />
         <appender-ref ref="ERROR_FILE" />
+        <appender-ref ref="TLS" />
     </root>
 
     <!-- 项目日志级别配置 -->
