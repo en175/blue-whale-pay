@@ -66,6 +66,12 @@
             </exclusions>
         </dependency>
 
+        <!-- spring-aop: TraceIdAspect 切面运行需要（MQ接收器/定时任务 trace_id 兜底） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- freemarker -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

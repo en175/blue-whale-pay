@@ -27,6 +27,9 @@ graphify-out/
 # 运行时生成物（asset 转存的 mp4/图片）
 data/
 
+# logback 读取未定义属性时产生的运行日志目录（如 currentLoggerFilePath_IS_UNDEFINED）
+*_IS_UNDEFINED/
+
 # OpenSpec 规划文档（入库共享，规格驱动开发）
 openspec-frontend/
 
