@@ -67,6 +67,10 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         updateRecord.setMchFeeAmount(payOrder.getMchFeeAmount());
         updateRecord.setChannelUser(payOrder.getChannelUser());
         updateRecord.setChannelOrderNo(payOrder.getChannelOrderNo());
+        // 渠道响应数据（如 hccb 退款所需的平台流水号/受理时间）在下单阶段即落库
+        if (payOrder.getChannelResData() != null) {
+            updateRecord.setChannelResData(payOrder.getChannelResData());
+        }
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_INIT));
@@ -74,12 +78,24 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
     /** 更新订单状态  【支付中】 --》 【支付成功】 **/
     public boolean updateIng2Success(String payOrderId, String channelOrderNo, String channelUserId){
+        return updateIng2Success(payOrderId, channelOrderNo, channelUserId, null);
+    }
+
+    /**
+     * 更新订单状态  【支付中】 --》 【支付成功】，并落库渠道响应数据。
+     *
+     * channelResData 用于保存成功时渠道返回、后续业务（如退款）需要回传的字段。
+     */
+    public boolean updateIng2Success(String payOrderId, String channelOrderNo, String channelUserId, String channelResData){
 
         PayOrder updateRecord = new PayOrder();
         updateRecord.setState(PayOrder.STATE_SUCCESS);
         updateRecord.setChannelOrderNo(channelOrderNo);
         updateRecord.setChannelUser(channelUserId);
         updateRecord.setSuccessTime(new Date());
+        if (channelResData != null) {
+            updateRecord.setChannelResData(channelResData);
+        }
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));

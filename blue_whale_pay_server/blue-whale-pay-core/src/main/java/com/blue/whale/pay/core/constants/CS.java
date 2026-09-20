@@ -148,6 +148,7 @@ public class CS {
         String XXPAY = "xxpay";     // 小新支付
         String PPPAY = "pppay";     // Paypal 支付
         String PLSPAY = "plspay";     // 计全支付plus
+        String HCCB = "hccb";       // 杭州银行线上支付平台
     }
 
 
@@ -185,6 +186,12 @@ public class CS {
         String UP_JSAPI = "UP_JSAPI"; // 银联JS支付
 
         String PP_PC = "PP_PC"; // Paypal 支付
+
+        // 杭州银行(hccb) 聚合主扫：一个二维码，用户在银行统一收银台上自选微信/支付宝/云闪付。
+        // 渠道选择对商户透明，故不区分支付宝/微信，仅此一个码。
+        // 注意：取值须与下游 new-api 的 wayCode 兜底逻辑兼容
+        // （管理后台 type=bluewhalepay_hccb_qr → 未知前缀 → payment_method=bluewhalepay）。
+        String HCCB_QR = "HCCB_QR";
     }
 
     //支付数据包 类型

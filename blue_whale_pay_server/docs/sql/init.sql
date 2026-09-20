@@ -270,6 +270,7 @@ CREATE TABLE `t_pay_order` (
         `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起额外参数',
         `channel_user` VARCHAR(64) DEFAULT NULL COMMENT '渠道用户标识,如微信openId,支付宝账号',
         `channel_order_no` VARCHAR(64) DEFAULT NULL COMMENT '渠道订单号',
+        `channel_res_data` TEXT DEFAULT NULL COMMENT '渠道响应数据（成功时渠道返回、后续业务需回传的字段）',
         `refund_state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '退款状态: 0-未发生实际退款, 1-部分退款, 2-全额退款',
         `refund_times` INT NOT NULL DEFAULT 0 COMMENT '退款次数',
         `refund_amount` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '退款总金额,单位分',
@@ -733,6 +734,8 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_B2B', '银联企业网银
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_PC', '银联网关支付');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_JSAPI', '银联Js支付');
 
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('HCCB_QR', '杭州银行聚合主扫');
+
 
 -- 初始化支付接口定义
 INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
@@ -775,3 +778,15 @@ VALUES ('plspay', '计全付', 1, 0, 1,
         '[{"name":"signType","desc":"签名方式","type":"radio","verify":"required","values":"MD5,RSA2","titles":"MD5,RSA2"},{"name":"merchantNo","desc":"计全付商户号","type":"text","verify":"required"},{"name":"appId","desc":"应用ID","type":"text","verify":"required"},{"name":"appSecret","desc":"md5秘钥","type":"textarea","verify":"required","star":"1"},{"name":"rsa2AppPrivateKey","desc":"RSA2: 应用私钥","type":"textarea","verify":"required","star":"1"},{"name":"rsa2PayPublicKey","desc":"RSA2: 支付网关公钥","type":"textarea","verify":"required","star":"1"}]',
         '[{"wayCode": "ALI_APP"}, {"wayCode": "ALI_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "ALI_LITE"}, {"wayCode": "ALI_PC"}, {"wayCode": "ALI_QR"}, {"wayCode": "ALI_WAP"}, {"wayCode": "WX_APP"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_H5"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "WX_LITE"}, {"wayCode": "WX_NATIVE"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/plspay.svg', '#0CACFF', 1, '计全付');
+
+-- 注册杭州银行支付接口
+-- way_codes 仅 HCCB_QR：银行返回统一收银台，用户在收银台自选微信/支付宝/云闪付，商户侧不区分渠道
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('hccb', '杭州银行', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"merId","desc":"商户编号","type":"text","verify":"required"},{"name":"certId","desc":"证书ID","type":"text","verify":"required"},{"name":"bankCertId","desc":"银行签名证书标识(信任锚,测试环境 H100001861)","type":"text","verify":"required"},{"name":"sdkAppId","desc":"版本号(sdkAppId)","type":"text","verify":"required"},{"name":"payUrl","desc":"支付网关地址","type":"text","verify":"required"},{"name":"mchCertFile","desc":"商户证书(.pfx格式)","type":"file","verify":"required"},{"name":"mchCertPwd","desc":"商户证书密码","type":"text","verify":"required"}]',
+        '[{"wayCode": "HCCB_QR"}]',
+        'https://www.hzbank.com.cn/favicon.ico',
+        '#004B87',
+        1, '杭州银行线上支付平台(ifsp-payweb) 聚合主扫');

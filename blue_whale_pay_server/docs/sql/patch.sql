@@ -303,3 +303,26 @@ alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COM
 
 
 ## -- ++++ [v3.1.0] ===> NEXT
+
+-- 增加支付订单渠道响应数据字段（hccb 退款需要回传原交易平台流水号与受理时间）
+alter table t_pay_order add column `channel_res_data` TEXT DEFAULT NULL COMMENT '渠道响应数据（成功时渠道返回、后续业务需回传的字段）' after `channel_order_no`;
+
+-- 新增杭州银行(hccb)渠道：聚合主扫支付方式
+INSERT IGNORE INTO t_pay_way (way_code, way_name) VALUES ('HCCB_QR', '杭州银行聚合主扫');
+
+-- 注册杭州银行支付接口
+-- way_codes 仅 HCCB_QR：银行返回统一收银台，用户在收银台自选微信/支付宝/云闪付，商户侧不区分渠道
+-- 幂等：hccb 行可能已由中间版本 patch 写入（字段定义已变），
+-- 直接 INSERT 会撞主键 → 后续语句被跳过 → 库里留下旧行（无 bankCertId，验签将 fail-closed 拒绝）。
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('hccb', '杭州银行', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"merId","desc":"商户编号","type":"text","verify":"required"},{"name":"certId","desc":"证书ID","type":"text","verify":"required"},{"name":"bankCertId","desc":"银行签名证书标识(信任锚,测试环境 H100001861)","type":"text","verify":"required"},{"name":"sdkAppId","desc":"版本号(sdkAppId)","type":"text","verify":"required"},{"name":"payUrl","desc":"支付网关地址","type":"text","verify":"required"},{"name":"mchCertFile","desc":"商户证书(.pfx格式)","type":"file","verify":"required"},{"name":"mchCertPwd","desc":"商户证书密码","type":"text","verify":"required"}]',
+        '[{"wayCode": "HCCB_QR"}]',
+        'https://www.hzbank.com.cn/favicon.ico',
+        '#004B87',
+        1, '杭州银行线上支付平台(ifsp-payweb) 聚合主扫')
+ON DUPLICATE KEY UPDATE
+  if_name=VALUES(if_name), normal_mch_params=VALUES(normal_mch_params),
+  way_codes=VALUES(way_codes), state=VALUES(state), remark=VALUES(remark);

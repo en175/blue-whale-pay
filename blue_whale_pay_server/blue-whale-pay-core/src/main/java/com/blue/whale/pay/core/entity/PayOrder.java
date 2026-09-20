@@ -16,6 +16,7 @@
 package com.blue.whale.pay.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blue.whale.pay.core.model.BaseModel;
@@ -199,6 +200,17 @@ public class PayOrder extends BaseModel implements Serializable {
      */
     @Schema(title = "channelOrderNo", description = "渠道订单号")
     private String channelOrderNo;
+
+    /**
+     * 渠道响应数据（成功时渠道返回、后续业务需要回传的字段，如杭州银行的平台流水号与受理时间）。
+     *
+     * 属内部对账数据，**不对外序列化**：商户端 list/detail 直接返回 PayOrder，
+     * 若序列化会把各渠道的原始上游报文（alipay/pppay 塞的是整个响应体）暴露给商户。
+     * 排查看日志（各渠道均打印原始响应）。
+     */
+    @Schema(title = "channelResData", description = "渠道响应数据")
+    @JSONField(serialize = false)
+    private String channelResData;
 
     /**
      * 退款状态: 0-未发生实际退款, 1-部分退款, 2-全额退款

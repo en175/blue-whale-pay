@@ -374,6 +374,9 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setChannelOrderNo(channelRetMsg.getChannelOrderId());
         payOrder.setErrCode(channelRetMsg.getChannelErrCode());
         payOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
+        // 渠道响应数据（如 hccb 退款所需的平台流水号/受理时间）在下单阶段即落库，
+        // 否则异步通知丢失时该数据无处可寻。
+        payOrder.setChannelResData(channelRetMsg.getChannelAttach());
 
         // 聚合码场景 订单对象存在会员信息， 不可全部以上游为准。
         if(StringUtils.isNotEmpty(channelRetMsg.getChannelUserId())){
