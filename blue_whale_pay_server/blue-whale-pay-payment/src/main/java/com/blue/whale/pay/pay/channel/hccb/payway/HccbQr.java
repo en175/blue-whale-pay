@@ -82,8 +82,8 @@ public class HccbQr extends HccbPaymentService {
         params.put("backEndUrl", getNotifyUrl(payOrder.getPayOrderId()));
         params.put("txnOrderId", payOrder.getPayOrderId());
         params.put("txnOrderTime", DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN));
-        // 主题与描述都为空时回落订单号：加签会跳过空值字段，若此处留空，
-        // 会出现「签名的字段集 ≠ 发送的字段集」，被银行判为验签失败。
+        // 主题与描述都为空时回落订单号：空串虽会同时出现在报文与签名里（两边一致），
+        // 但银行侧对 txnOrderBody 有非空约束，留空会被判要素缺失。
         params.put("txnOrderBody", StringUtils.defaultIfBlank(
                 StringUtils.defaultIfBlank(payOrder.getSubject(), payOrder.getBody()),
                 payOrder.getPayOrderId()));

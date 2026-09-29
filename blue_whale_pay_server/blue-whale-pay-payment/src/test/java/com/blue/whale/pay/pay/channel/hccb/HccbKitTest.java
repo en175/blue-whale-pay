@@ -18,6 +18,7 @@ package com.blue.whale.pay.pay.channel.hccb;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.blue.whale.pay.core.constants.CS;
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import com.blue.whale.pay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.blue.whale.pay.pay.channel.hccb.payway.HccbQr;
@@ -65,17 +66,31 @@ class HccbKitTest {
     }
 
     @Test
-    @DisplayName("coverMap2String：加签跳过空值，验签保留空值")
-    void coverMap2String_blankHandlingDiffersByPurpose() {
-        Map<String, Object> data = new HashMap<>();
+    @DisplayName("coverMap2String：null 一律跳过、空串保留——与 fastjson 序列化行为严格对齐")
+    void coverMap2String_nullSkippedBlankKept() {
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("a", "1");
-        data.put("b", "");
-        data.put("c", null);
+        data.put("b", "");      // 空串：报文中会出现 "b":""，签名也必须含 b=
+        data.put("c", null);    // null：fastjson 不输出该键，签名也必须跳过
 
-        // 加签跳过空值，避免「签名字段集 ≠ 发送字段集」
-        assertEquals("a=1", HccbKit.coverMap2String(data, true));
-        // 验签保留全部字段（银行按全字段签名）
-        assertEquals("a=1&b=&c=null", HccbKit.coverMap2String(data, false));
+        // 加签（skipBlank=false）：null 跳过、空串保留
+        assertEquals("a=1&b=", HccbKit.coverMap2String(data, false));
+    }
+
+    @Test
+    @DisplayName("签名集必须等于发送集：null 值键两边都不出现（曾出现「签名含 k=null、报文无该键」）")
+    void signFieldSet_mustMatchSerializedJson() {
+        Map<String, Object> sent = new LinkedHashMap<>();
+        sent.put("merId", "M1");
+        sent.put("sdkAppId", null);   // 配置缺失时会出现的场景
+        sent.put("txnAmt", "1");
+
+        String signed = HccbKit.coverMap2String(sent, false);
+        String json = com.alibaba.fastjson.JSON.toJSONString(sent);
+
+        assertFalse(signed.contains("sdkAppId"), "签名含 null 字段，但报文中不会有该键 —— 银行验签会失败");
+        assertFalse(json.contains("sdkAppId"), "前置假设变化：fastjson 现在会输出 null 键，需同步调整签名规则");
+        assertEquals("merId=M1&txnAmt=1", signed);
     }
 
     // ---------------------------------------------------------------- 真实响应验签（关键回归）
@@ -305,18 +320,15 @@ class HccbKitTest {
     // ---------------------------------------------------------------- 查询流水号
 
     @Test
-    @DisplayName("buildQueryOrderId：不超 32 字符，且同一订单多次调用不重复")
-    void buildQueryOrderId_shouldBeBoundedAndUnique() throws InterruptedException {
-        String bizId = "P202609200000000000000000001";
-
-        String first = HccbKit.buildQueryOrderId(bizId);
-        Thread.sleep(2);
-        String second = HccbKit.buildQueryOrderId(bizId);
+    @DisplayName("buildQueryOrderId：不超渠道 32 字符限制，且每次调用不重复")
+    void buildQueryOrderId_shouldBeBoundedAndUnique() {
+        String first = HccbKit.buildQueryOrderId();
+        String second = HccbKit.buildQueryOrderId();
 
         assertTrue(first.length() <= 32, "查询流水号超出渠道 32 字符限制：" + first);
         assertTrue(second.length() <= 32, "查询流水号超出渠道 32 字符限制：" + second);
-        // 轮询会对同一订单反复查询；若流水号复用且银行做唯一性校验，第二次起会被拒 → 补单静默失效
-        assertNotEquals(first, second, "轮询复用同一查询流水号，可能导致补单静默失效");
+        // 轮询对同一订单反复查询；若流水号复用且银行做唯一性校验，第二次起会被拒 → 补单静默失效
+        assertNotEquals(first, second, "轮询复用了同一查询流水号，可能导致补单静默失效");
     }
 
     // ----------------------------------------------------------------

@@ -99,13 +99,15 @@ public class HccbRefundService extends HccbPaymentService implements IRefundServ
 
         JSONObject resp = request(cfg, params, channelRetMsg);
         if (resp == null) {
-            // ⚠️ 退款是动钱操作：证书/加签/验签异常只说明"我们无法确认这笔退款的结果"，
-            //    请求本身可能已被银行成功执行。若在此判 CONFIRM_FAIL，下游会收到"退款失败"
-            //    并可能重试 → 银行侧双倍退款。
-            //    因此一律降级为 WAITING，交由 RefundOrderReissueTask 走查单收敛。
-            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL) {
-                log.warn("[hccb] 退款响应无法确认（errCode={}），不判失败，转由轮询查单收敛 refundOrderId={}",
-                        channelRetMsg.getChannelErrCode(), refundOrder.getRefundOrderId());
+            // ⚠️ 只有「验签失败」是"请求已发出、结果未知"，才降级 WAITING 由轮询收敛 ——
+            //    若判 CONFIRM_FAIL，下游可能重试 → 银行侧双倍退款。
+            //
+            //    证书/加签失败发生在发送**之前**，请求确定没发出去，判 WAITING 会让退款单
+            //    永远卡在 ING（轮询查单同样失败）且商户拿不到终态。这两种如实判失败，
+            //    让运营改正配置后重试。
+            if (HccbPaymentService.ERR_VERIFY.equals(channelRetMsg.getChannelErrCode())) {
+                log.warn("[hccb] 退款响应验签失败、结果未知，不判失败，转由轮询查单收敛 refundOrderId={}",
+                        refundOrder.getRefundOrderId());
                 return ChannelRetMsg.waiting();
             }
             return channelRetMsg;
@@ -134,7 +136,7 @@ public class HccbRefundService extends HccbPaymentService implements IRefundServ
         Map<String, Object> params = buildCommonParams(cfg);
         params.put("txnType", HccbKit.TXN_TYPE_QUERY);
         params.put("txnSubType", HccbKit.TXN_SUB_TYPE_QUERY);
-        params.put("txnOrderId", HccbKit.buildQueryOrderId(refundOrder.getRefundOrderId()));
+        params.put("txnOrderId", HccbKit.buildQueryOrderId());
         params.put("txnOrderTime", DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN));
         params.put("origTxnOrderId", refundOrder.getRefundOrderId());
 

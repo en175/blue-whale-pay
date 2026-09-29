@@ -305,7 +305,13 @@ alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COM
 ## -- ++++ [v3.1.0] ===> NEXT
 
 -- 增加支付订单渠道响应数据字段（hccb 退款需要回传原交易平台流水号与受理时间）
-alter table t_pay_order add column `channel_res_data` TEXT DEFAULT NULL COMMENT '渠道响应数据（成功时渠道返回、后续业务需回传的字段）' after `channel_order_no`;
+-- 幂等：MySQL 8.0 不支持 ADD COLUMN IF NOT EXISTS，用 information_schema 条件判断
+SET @col_exists := (SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 't_pay_order' AND column_name = 'channel_res_data');
+SET @ddl := IF(@col_exists = 0,
+  'alter table t_pay_order add column `channel_res_data` TEXT DEFAULT NULL COMMENT ''渠道响应数据（成功时渠道返回、后续业务需回传的字段）'' after `channel_order_no`',
+  'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- 新增杭州银行(hccb)渠道：聚合主扫支付方式
 INSERT IGNORE INTO t_pay_way (way_code, way_name) VALUES ('HCCB_QR', '杭州银行聚合主扫');

@@ -55,7 +55,7 @@ public class HccbPayOrderQueryService extends HccbPaymentService implements IPay
         Map<String, Object> params = buildCommonParams(cfg);
         params.put("txnType", HccbKit.TXN_TYPE_QUERY);
         params.put("txnSubType", HccbKit.TXN_SUB_TYPE_QUERY);
-        params.put("txnOrderId", HccbKit.buildQueryOrderId(payOrder.getPayOrderId()));
+        params.put("txnOrderId", HccbKit.buildQueryOrderId());
         params.put("txnOrderTime", DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN));
         params.put("origTxnOrderId", payOrder.getPayOrderId());
 

@@ -153,14 +153,14 @@ public class HccbPaymentService extends AbstractPaymentService {
             if (!HccbKit.verify(resp, respSign, cfg.getBankCertId())) {
                 log.error("[hccb] 响应验签失败：{}", respStr);
                 retMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-                retMsg.setChannelErrCode("VERIFY_ERROR");
+                retMsg.setChannelErrCode(ERR_VERIFY);
                 retMsg.setChannelErrMsg("响应报文验签失败");
                 return null;
             }
         } catch (Exception e) {
             log.error("[hccb] 响应验签异常", e);
             retMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            retMsg.setChannelErrCode("VERIFY_ERROR");
+            retMsg.setChannelErrCode(ERR_VERIFY);
             retMsg.setChannelErrMsg("响应报文验签异常");
             return null;
         }
@@ -170,6 +170,9 @@ public class HccbPaymentService extends AbstractPaymentService {
 
         return resp;
     }
+
+    /** 验签失败的错误码：请求已发出、但响应不可信，属「结果未知」 */
+    public static final String ERR_VERIFY = "VERIFY_ERROR";
 
     /** 按应答码回填失败信息 */
     protected void fillFail(ChannelRetMsg retMsg, JSONObject resp) {

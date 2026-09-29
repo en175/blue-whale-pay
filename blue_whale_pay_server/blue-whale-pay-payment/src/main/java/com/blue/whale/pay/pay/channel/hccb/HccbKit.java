@@ -117,8 +117,8 @@ public class HccbKit {
      * 加签。
      *
      * ⚠️ 传入的必须是**即将发送的那份报文**（未含 signAture）。
-     *    签名按全字段参与、不跳过空值，保证「签名的字段集 == 发送的字段集」；
-     *    若此处跳空值而报文仍带空值字段，银行按全字段验签会判失败。
+     *    签名规则与 JSON 序列化严格对齐（null 键两边都不出现；空串两边都出现），
+     *    保证「签名的字段集 == 发送的字段集」，否则银行按报文验签会判失败。
      *
      * @param params 即将发送的报文（不含 signAture）
      * @param pfx    商户证书字节
@@ -202,8 +202,9 @@ public class HccbKit {
     /**
      * 把 Map 拼成待签名/待验签字符串：按参数名 ASCII 升序，k1=v1&k2=v2...（不含末尾 &）。
      *
-     * @param skipBlank 是否跳过空值参数。
-     *                  加签跳过（与官方 Demo 一致）；验签保留全部（银行按全字段签名）。
+     * @param skipBlank 是否额外跳过**空字符串**参数。
+     *                  null 值一律跳过（与 fastjson 序列化行为对齐，保证签/发一致）；
+     *                  验签传 false —— 银行按收到的全部字段签名。
      */
     public static String coverMap2String(Map<String, ?> data, boolean skipBlank) {
 
@@ -214,7 +215,12 @@ public class HccbKit {
                 continue;   // 签名域不参与
             }
             Object value = en.getValue();
-            if (skipBlank && (value == null || StringUtils.isBlank(String.valueOf(value)))) {
+            // null 值一律跳过：fastjson 默认不输出 null 键（未开 WriteMapNullValue），
+            // 若签名时把 null 拼成 "k=null" 而报文里没有该键，就会出现「签名集 ≠ 发送集」。
+            if (value == null) {
+                continue;
+            }
+            if (skipBlank && StringUtils.isBlank(String.valueOf(value))) {
                 continue;
             }
             tree.put(key, value);
@@ -317,9 +323,9 @@ public class HccbKit {
      * 复用同一个号会导致第二次起全部被拒 → 补单静默失效，故每次调用都生成新号。
      *
      * 唯一部分（时间戳 + 序列）放在最前，确保即使订单号很长、末尾被截断也不会退化成重复值。
-     * 被查询的订单由报文中独立的 origTxnOrderId 指定，不依赖本流水号。
+     * 被查询的订单由报文中独立的 origTxnOrderId 指定，故本流水号无需携带业务单号。
      */
-    public static String buildQueryOrderId(String bizId) {
+    public static String buildQueryOrderId() {
         String id = "Q" + System.currentTimeMillis()
                 + String.format("%03d", SEQ.incrementAndGet() % 1000);
         return id.length() <= 32 ? id : id.substring(0, 32);
