@@ -1,6 +1,8 @@
 # Gitee Issue 与 MCP 工具
 
-Issues 追踪在 Gitee 仓库 `git@gitee.com:hangzhou_xuanfu_1/blue-whale-ai.git`。详细流程：`docs/agents/issue-tracker.md`
+> **正文格式保护：** MCP 读取的 Markdown／HTML 不代表编辑模式；富文本正文不得用普通 `description` 整体写回。正文变更遵守共同 SOP 的“Gitee 富文本保护”，使用保留格式的编辑入口，保存后重进编辑态核验图表。改其他字段不带正文。
+
+Issues 追踪在 Gitee 仓库 `git@gitee.com:hangzhou-xuanfu_1/blue-whale-pay.git`。产研协作规则：`docs/agents/bluewhale-product-sop.md`
 
 > ⚠️ **所有 `mcp__gitee-ent__*` 调用**：`enterprise_id` / `project_id` / `program_id` 的兜底值见 CLAUDE.md「Gitee ID 兜底常量」（日常直接用）。**永不从网页 URL 抄**——URL 的 `883843` 是 program_id，误当 `enterprise_id` / `project_id` 传入会触发误导性 401。疑似变更或 401 时，用 `list` API 动态查 + `scripts/gitee-resolve-ids.sh resolve <URL>` 校验。详见 `docs/agents/issue-tracker.md`「ID 解析约定」。
 
@@ -18,7 +20,7 @@ Issues 追踪在 Gitee 仓库 `git@gitee.com:hangzhou_xuanfu_1/blue-whale-ai.git
 
 ## 创建 PR
 
-- `mcp__gitee-ent__create_enterprise_repo_pull` — **必传数字 `project_id`**（值用 `list_enterprise_repositories` 查）。工具描述写「Project ID or PathWithNamespace」，**实际传 PathWithNamespace（如 `hangzhou_xuanfu_1/blue-whale-ai`）会 404「仓库不存在」**，勿被误导。
+- `mcp__gitee-ent__create_enterprise_repo_pull` — **必传数字 `project_id`**（值用 `list_enterprise_repositories` 查）。工具描述写「Project ID or PathWithNamespace」，**实际传 PathWithNamespace（如 `hangzhou-xuanfu_1/blue-whale-pay`）会 404「仓库不存在」**，勿被误导。
 - 查询方式：`list_enterprise_repositories(enterprise_id, search=...)` → 取返回结果中的数字 `id`。
 
 ## 子 Issue
@@ -33,48 +35,30 @@ Issues 追踪在 Gitee 仓库 `git@gitee.com:hangzhou_xuanfu_1/blue-whale-ai.git
 - 长度 2–20，非特殊字符。
 - Triage 五标签：needs-triage / needs-info / ready-for-agent / ready-for-human / wontfix。详见 `docs/agents/triage-labels.md`
 
-## 任务状态机（Agent 全自动流转）
+## 任务状态与真实交付
 
-看板状态必须实时反映真实进度。以下流转由 Agent 在触发点主动执行，不等人手动改。
+按 [蓝鲸产研协作规则](../../docs/agents/bluewhale-product-sop.md) 执行。先核对 PRD 评审和产品确认，再开始受影响的业务代码修改；建 worktree、提交或合并 PR 本身均不构成评审、验收或上线证据。
 
-### 状态白名单（仅此这些流转，状态 id 为本仓实测值）
+| 节点 | 状态与责任 |
+| --- | --- |
+| 开始执行 | 需求／任务进入开发中，缺陷进入修复中；须已具备规格、认领和当前操作授权 |
+| 提交、创建或合并 PR | 不自动置完成态；按仓库约定更新审查标签，不能代替部署与验收 |
+| 实际候选部署到测试环境 | 有部署证据后可按授权提测，进入测试-待测试 |
+| 测试及发布前验收通过 | 测试确认后进入待发布；随父需求一起测的子任务也必须有对应测试结论 |
+| 实际部署生产 | 按授权进入生产-待验证；部署不等于验收 |
+| 生产验证与测试、产品共同验收通过 | 两环境验证均通过后，依角色权限进入已上线；不能代签验收 |
+| 不通过或放弃 | 测试／生产相应打回，研发接回开发中／修复中后重新验证；已关闭用于放弃等终止情形 |
 
-| 触发点 | 类型 | 流转 |
-| --- | --- | --- |
-| worktree 入口成功且带 `--issue` | 需求 | 意向(4336301) → 进行中(4336298) |
-| 同上 | 任务 | 待办的(4336297) → 进行中(4336298) |
-| 同上 | 缺陷 | 待确认(4336303)/已确认(4336304) → 修复中(4336305) |
-| PR 创建成功 | 全部 | 打 `ready-for-review` 标签(id 344268623) |
-| PR 合并成功 | 需求/任务 | → 已完成(4336299) |
-| PR 合并成功 | 缺陷 | → 已修复(4336306)，另打 `修复待验证` 标签(id 344168629) |
-
-- **禁止 Agent 设置**：已验收(4336307)、已拒绝(4336302)、已取消(4336300) —— 归人操作。
-- 只读任务（调研/答疑/评审，不建 worktree）不触发状态流转；`--no-issue` 任务无状态可改。
-
-### 开工流转（worktree 入口成功后立即执行）
-
-1. `get_enterprise_issue_detail` 查当前状态。
-2. 前置状态判定：
-   - 预期起点（需求=意向、任务=待办的、缺陷=待确认/已确认）→ 调 `update_enterprise_issue(issue_state_id=<目标>)` 流转。缺陷在「待确认」也直接跳「修复中」（认领即确认），不走「已确认」中间步。
-   - 已是「进行中」→ **停止**，向用户报告并等待指示（可能他人/另一会话在做）。
-   - 已是终态（已完成/已取消/已拒绝）→ **停止**，向用户报告并等待指示（防重复做已完成任务）。
-3. 状态 id 疑似失效（报错）时按 `list_issue_type_states(enterprise_id, issue_type_id)` 重查，不得凭本表死磕。
-
-### 完成流转（PR 合并成功后执行）
-
-- 按白名单表置完成态；缺陷另打 `修复待验证`。
-- 补标签时 `label_ids` 是整体语义：先 `get_enterprise_issue_detail` 取现有标签，合并后整体写回，不得只传新标签覆盖掉旧标签。
-
-### 失败处理
-
-- 状态/标签变更失败：重试一次。
-- 仍失败：继续主线工作不阻塞，但最终汇报必须置顶标红「⚠️ 工单状态未同步」，附手动指引（工单号 + 目标状态名 + 状态 id）。
-- 幂等：工单已在目标状态视为成功，直接跳过。
+- 纯文档、调研及测试专项按实际交付目标处理，不虚构部署。子任务交付不自动完成父需求。
+- 读细状态 `issue_state.title`，不可仅按粗状态 `state` 判断。写前用 `list_issue_type_states` 查询当前类型的合法 ID，不沿用退役的「已完成／已修复／已验收」状态 ID。
+- 已有其他人在做、处于测试／待发布／生产待验证或已终止时，先确认接手或返工范围，不自动抢占或重开。
+- 状态、标签、评论均须处于当前用户授权范围；测试结论、共同验收、优先级和发布放行由相应负责人确认。只读任务及 `--no-issue` 任务不自动流转工单。
+- 改状态不带 `description`；补标签先读现有列表再合并写回。写后回读；失败先确认实际状态再决定是否重试，不盲目重复提交，未同步如实报告。
 
 ## 关闭 Issue
 
 - `mcp__gitee-ent__update_enterprise_issue` — 用 `issue_state_id`，**不是 `state`**（该工具无此参数）。
-- 先 `list_issue_type_states` 查合法状态枚举，传「已完成」对应的 id。
+- 先 `list_issue_type_states` 查合法状态枚举；按实际交付和验收选择状态，已关闭只用于终止，不因 PR 合并自动完成。
 
 ## 合并 PR
 
