@@ -8,7 +8,7 @@
 #
 # 触发（均 PostToolUse）：
 #   1. Bash 成功执行 start-task-worktree 且带 --issue <ident>
-#      → 提醒核对 PRD 评审、产品确认、版本、认领与操作授权；worktree 成功不代表准入通过。
+#      → 提醒核对 PRD 评审、产品确认、版本、开发子任务创建、负责人及操作授权；worktree 成功不代表准入通过。
 #   2. mcp__gitee-ent__create_enterprise_repo_pull 成功
 #      → 提醒给关联工单打 ready-for-review 标签。
 #   3. mcp__gitee-ent__merge_enterprise_pull 成功
@@ -56,7 +56,7 @@ case "$TOOL_NAME" in
 📋 工单状态提醒：worktree 入口已带 --issue ${ISSUE}。
 下一步（规则见 .claude/rules/issue-tracker.md「任务状态与真实交付」）：
 1. get_enterprise_issue_detail 查 ${ISSUE} 当前状态。
-2. 先核对适用 PRD 的产品评审确认、业务父需求、目标版本、认领及当前操作授权；
+2. 先核对适用 PRD 的产品评审确认、业务父需求、目标版本、负责人及当前操作授权；业务开发确认子任务已由开发创建并挂业务父需求，缺陷按缺陷关联规则处理；
    满足准入后才按合法路径进入开发中／修复中，不因 worktree 建立就自动改状态。
 3. 已有人执行、已在测试或发布阶段、或已终止时，先确认接手／返工范围，不自动抢占或重开。
 EOF
