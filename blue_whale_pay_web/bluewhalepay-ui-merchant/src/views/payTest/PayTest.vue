@@ -170,6 +170,17 @@
               <img src="@/assets/payTestImg/pp_pc.svg" class="paydemo-type-img" />
               <span class="color-change">PayPal支付</span>
             </div>
+
+            <!-- 杭州银行聚合主扫：银行返回统一收银台链接，用户在收银台自选微信/支付宝/云闪付 -->
+            <div
+              class="paydemo-type color-change"
+              v-show="vdata.appPaywayList.indexOf('HCCB_QR') >= 0"
+              @click="changeCurrentWayCode('HCCB_QR', 'codeImgUrl')"
+              :class="{ this: vdata.currentWayCode === 'HCCB_QR' }"
+            >
+              <img src="@/assets/payTestImg/qr_cashier.svg" class="paydemo-type-img" />
+              <span class="color-change">杭州银行扫码</span>
+            </div>
           </div>
         </div>
 
@@ -435,7 +446,8 @@ function showQtTitle() {
   if (
     vdata.appPaywayList.toString().indexOf('WX') !== -1 ||
     vdata.appPaywayList.toString().indexOf('ALI') !== -1 ||
-    vdata.appPaywayList.toString().indexOf('PP_PC') !== -1
+    vdata.appPaywayList.toString().indexOf('PP_PC') !== -1 ||
+    vdata.appPaywayList.toString().indexOf('HCCB') !== -1
   ) {
     return true
   } else {

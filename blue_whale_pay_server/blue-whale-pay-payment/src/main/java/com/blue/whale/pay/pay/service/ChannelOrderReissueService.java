@@ -74,7 +74,7 @@ public class ChannelOrderReissueService {
 
             // 查询成功
             if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
-                if (payOrderService.updateIng2Success(payOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId())) {
+                if (payOrderService.updateIng2Success(payOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId(), channelRetMsg.getChannelAttach())) {
 
                     //订单支付成功，其他业务逻辑
                     payOrderProcessService.confirmSuccess(payOrder);
