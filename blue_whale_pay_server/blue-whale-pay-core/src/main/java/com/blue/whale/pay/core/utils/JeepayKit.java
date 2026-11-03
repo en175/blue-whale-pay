@@ -78,8 +78,9 @@ public class JeepayKit {
             sb.append(arrayToSort[i]);
         }
         String result = sb.toString();
+        // 保留待签原文字段便于排查，商户密钥必须脱敏，禁止输出明文（IKSDG9）
+        log.info("signStr:{}key=***", result);
         result += "key=" + key;
-        log.info("signStr:{}", result);
         result = md5(result, encodingCharset).toUpperCase();
         log.info("sign:{}", result);
         return result;
