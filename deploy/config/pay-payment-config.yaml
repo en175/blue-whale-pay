@@ -1,0 +1,147 @@
+# 蓝鲸支付 · 配置（ConfigMap pay-payment-config）
+#
+# ⚠️ 本文件不走 pay-prod 流水线，由人工下发一次：
+#     kubectl apply -f deploy/config/
+#   修改后 subPath 挂载不热更新，需重启对应 Deployment：
+#     kubectl rollout restart deployment/pay-payment
+#
+# 为什么单独拆出来：火山持续交付的 kubectl-deploy-yaml 步骤会把 manifest 中
+# 所有 ${...} 当作流水线变量替换，未声明的变量（如 ${DB_HOST:mysql}）会被
+# 替换成空串，导致 ConfigMap 里的数据库/Redis/MQ/TOS/JWT 配置全部为空、Pod 启动失败。
+# 这里的 ${VAR:默认值} 是 Spring 占位符，运行时由容器环境变量覆盖。
+#
+# 依赖 Secret blue-whale-pay-secrets，字段见 blue-whale-pay-payment.yaml 顶部说明。
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pay-payment-config
+  namespace: default
+data:
+  application.yml: |
+    server:
+      port: 9216
+      servlet:
+        context-path: /
+      # 识别 X-Forwarded-*：外层反代（HTTPS / 域名）下收银台 return_url、
+      # 支付回调 URL 与微信 H5 redirect_url 才能拼对协议和 host
+      forward-headers-strategy: framework
+      # 收到 SIGTERM 后停止接新请求、等待在途支付请求完成
+      shutdown: graceful
+    spring:
+      application:
+        name: bluewhale-pay-payment
+      lifecycle:
+        timeout-per-shutdown-phase: 30s
+      main:
+        allow-circular-references: true
+      servlet:
+        multipart:
+          enabled: true
+          max-request-size: 10MB
+          max-file-size: 10MB
+      web:
+        resources:
+          static-locations: classpath:/static
+      freemarker:
+        template-loader-path: classpath:/templates
+        template-encoding: UTF-8
+        suffix: .ftl
+        settings:
+          classic_compatible: true
+          number_format: '#'
+      datasource:
+        url: "jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:blue_whale_pay}?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true"
+        username: ${DB_USERNAME:root}
+        password: ${DB_PASSWORD:}
+        druid:
+          initial-size: 5
+          min-idle: 5
+          max-active: 30
+          max-wait: 60000
+          test-while-idle: true
+          test-on-borrow: false
+          test-on-return: false
+          time-between-eviction-runs-millis: 60000
+          min-evictable-idle-time-millis: 300000
+          validation-query: SELECT 1 FROM DUAL
+          pool-prepared-statements: false
+          max-pool-prepared-statement-per-connection-size: 20
+          filters: stat,wall
+          connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      cache:
+        type: redis
+      data:
+        redis:
+          host: ${REDIS_HOST:redis}
+          port: ${REDIS_PORT:6379}
+          # 1库：运营平台  #2库：商户系统 #3库：支付网关 —— 三服务分别占用，勿改
+          database: 3
+          timeout: 1000
+          password: ${REDIS_PASSWORD:}
+    logging:
+      level:
+        root: info
+        # 需要打印 SQL 时临时改 debug，改完记得 rollout restart
+        com.blue.whale.pay: info
+      path: /jeepayhomes/service/logs
+    springdoc:
+      swagger-ui:
+        path: /swagger-ui.html
+      api-docs:
+        path: /v3/api-docs
+      group-configs:
+        - group: 'default'
+          display-name: '支付网关'
+          paths-to-match: '/**'
+          packages-to-scan: com.blue.whale.pay.pay.ctrl.test
+    knife4j:
+      enable: true
+      setting:
+        language: zh_cn
+        swagger-model-name: 公共响应
+      documents:
+        - name: API
+          locations: classpath:markdown/doc/*
+          group: default
+    isys:
+      allow-cors: true
+      cache-config: false
+      oss:
+        file-root-path: /jeepayhomes/service/uploads
+        file-public-path: ${isys.oss.file-root-path}/public
+        file-private-path: ${isys.oss.file-root-path}/private
+        service-type: volc-tos
+        volcengine-tos:
+          endpoint: ${TOS_ENDPOINT:https://tos-cn-beijing.volces.com}
+          region: ${TOS_REGION:cn-beijing}
+          public-bucket-name: ${TOS_PUBLIC_BUCKET:sweet-oa}
+          private-bucket-name: ${TOS_PRIVATE_BUCKET:sweet-oa}
+          access-key: ${TOS_ACCESS_KEY}
+          secret-key: ${TOS_SECRET_KEY}
+          domain: ${TOS_DOMAIN:https://sweet-oa.tos-cn-beijing.volces.com}
+          prefix: ${TOS_PREFIX:bluewhale-pay}
+      # 火山 TLS 日志上报；缺凭证时 TlsLogAppender 自动跳过，仅保留本地日志
+      tls:
+        endpoint: ${TLS_ENDPOINT:}
+        region: ${TLS_REGION:}
+        topic-id: ${TLS_TOPIC_ID:}
+        access-key: ${TLS_AK:}
+        secret-key: ${TLS_SK:}
+        container: ${CONTAINER_NAME:pay-payment}
+        env: ${ENV:prod}
+        version: ${TLS_VERSION:}
+      mq:
+        vender: rocketMQ
+    rocketmq:
+      name-server: ${ROCKETMQ_NAMESRV:rocketmq-namesrv:9876}
+      producer:
+        group: PID_BLUE_WHALE_PAY_PAYMENT
+        access-key: ${ROCKETMQ_ACCESS_KEY}
+        secret-key: ${ROCKETMQ_SECRET_KEY}
+        send-message-timeout: 10000
+        retry-times-when-send-failed: 2
+        retry-times-when-send-async-failed: 2
+      consumer:
+        access-key: ${ROCKETMQ_ACCESS_KEY}
+        secret-key: ${ROCKETMQ_SECRET_KEY}
