@@ -1,0 +1,328 @@
+# 蓝鲸支付 · 支付网关（pay-payment，端口 9216）
+#
+# 镜像：火山 CR，由 blue_whale_pay_server/.volcano/pipeline-pay-payment.yml 构建
+#       （region=cn-beijing, registryInstance=blue-whale, repo=blue_whale_pay_payment）
+#       路径前缀按兄弟仓 blue-whale-ai/deploy 的实际写法取 `bluewhale/`。
+#
+# 配置注入：application.yml 由 ConfigMap 以 subPath 挂到
+#   /jeepayhomes/service/app/application.yml
+# 与 Dockerfile CMD 的 --spring.config.additional-location=file:/jeepayhomes/service/app/application.yml 对齐。
+# subPath 不热更新：改 ConfigMap 后需 kubectl rollout restart deployment/pay-payment。
+#
+# apply 前置条件：
+#   1. Secret ccr-secret（镜像拉取，与 blue-whale-ai 集群共用）
+#   2. Secret blue-whale-pay-secrets，至少包含：
+#        DB_HOST DB_PORT DB_NAME DB_USERNAME DB_PASSWORD
+#        REDIS_HOST REDIS_PORT REDIS_PASSWORD
+#        ROCKETMQ_NAMESRV ROCKETMQ_ACCESS_KEY ROCKETMQ_SECRET_KEY
+#        TOS_ACCESS_KEY TOS_SECRET_KEY
+#        TLS_ENDPOINT TLS_REGION TLS_TOPIC_ID TLS_AK TLS_SK   （缺省不影响启动）
+#   3. 集群内可达的 MySQL / Redis / RocketMQ
+#
+# ⚠️ 副本数固定 1：payment 模块有 6 个 @Scheduled 补单/超时任务
+#   （PayOrderReissueTask / RefundOrderReissueTask / TransferOrderReissueTask /
+#     PayOrderExpiredTask / RefundOrderExpiredTask / PayOrderDivisionRecordReissueTask），
+#   均为每分钟一次且无分布式锁。多副本会重复轮询渠道、可能重复推送商户通知。
+#   确需扩容，先加 Redis 分布式锁再改 replicas。
+#
+# ⚠️ paySiteUrl 可达性：Service 用 NodePort 30216，paySiteUrl 一个值承担三种用途：
+#   ① 银行异步通知 {paySiteUrl}/api/pay/notify/hccb —— 须公网可达
+#   ② 运营平台发起退款 /api/refund/refundOrder —— 须 manager 可达
+#   ③ 二维码图片 {paySiteUrl}/api/scan/imgs/... —— 须用户浏览器可达
+#   仍须保证节点/SLB 有公网入口，且 t_sys_config.paySiteUrl 配成该公网地址（不含结尾 /）。
+#   三种用途冲突时需拆分内网/外网地址，见 docs/2026-09-20-杭州银行渠道-配置与运维方案.md §2.2。
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pay-payment-config
+  namespace: default
+data:
+  application.yml: |
+    server:
+      port: 9216
+      servlet:
+        context-path: /
+      # 识别 X-Forwarded-*：外层反代（HTTPS / 域名）下收银台 return_url、
+      # 支付回调 URL 与微信 H5 redirect_url 才能拼对协议和 host
+      forward-headers-strategy: framework
+      # 收到 SIGTERM 后停止接新请求、等待在途支付请求完成
+      shutdown: graceful
+    spring:
+      application:
+        name: bluewhale-pay-payment
+      lifecycle:
+        timeout-per-shutdown-phase: 30s
+      main:
+        allow-circular-references: true
+      servlet:
+        multipart:
+          enabled: true
+          max-request-size: 10MB
+          max-file-size: 10MB
+      web:
+        resources:
+          static-locations: classpath:/static
+      freemarker:
+        template-loader-path: classpath:/templates
+        template-encoding: UTF-8
+        suffix: .ftl
+        settings:
+          classic_compatible: true
+          number_format: '#'
+      datasource:
+        url: "jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:blue_whale_pay}?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true"
+        username: ${DB_USERNAME:root}
+        password: ${DB_PASSWORD:}
+        druid:
+          initial-size: 5
+          min-idle: 5
+          max-active: 30
+          max-wait: 60000
+          test-while-idle: true
+          test-on-borrow: false
+          test-on-return: false
+          time-between-eviction-runs-millis: 60000
+          min-evictable-idle-time-millis: 300000
+          validation-query: SELECT 1 FROM DUAL
+          pool-prepared-statements: false
+          max-pool-prepared-statement-per-connection-size: 20
+          filters: stat,wall
+          connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      cache:
+        type: redis
+      data:
+        redis:
+          host: ${REDIS_HOST:redis}
+          port: ${REDIS_PORT:6379}
+          # 1库：运营平台  #2库：商户系统 #3库：支付网关 —— 三服务分别占用，勿改
+          database: 3
+          timeout: 1000
+          password: ${REDIS_PASSWORD:}
+    logging:
+      level:
+        root: info
+        # 需要打印 SQL 时临时改 debug，改完记得 rollout restart
+        com.blue.whale.pay: info
+      path: /jeepayhomes/service/logs
+    springdoc:
+      swagger-ui:
+        path: /swagger-ui.html
+      api-docs:
+        path: /v3/api-docs
+      group-configs:
+        - group: 'default'
+          display-name: '支付网关'
+          paths-to-match: '/**'
+          packages-to-scan: com.blue.whale.pay.pay.ctrl.test
+    knife4j:
+      enable: true
+      setting:
+        language: zh_cn
+        swagger-model-name: 公共响应
+      documents:
+        - name: API
+          locations: classpath:markdown/doc/*
+          group: default
+    isys:
+      allow-cors: true
+      cache-config: false
+      oss:
+        file-root-path: /jeepayhomes/service/uploads
+        file-public-path: ${isys.oss.file-root-path}/public
+        file-private-path: ${isys.oss.file-root-path}/private
+        service-type: volc-tos
+        volcengine-tos:
+          endpoint: ${TOS_ENDPOINT:https://tos-cn-beijing.volces.com}
+          region: ${TOS_REGION:cn-beijing}
+          public-bucket-name: ${TOS_PUBLIC_BUCKET:sweet-oa}
+          private-bucket-name: ${TOS_PRIVATE_BUCKET:sweet-oa}
+          access-key: ${TOS_ACCESS_KEY}
+          secret-key: ${TOS_SECRET_KEY}
+          domain: ${TOS_DOMAIN:https://sweet-oa.tos-cn-beijing.volces.com}
+          prefix: ${TOS_PREFIX:bluewhale-pay}
+      # 火山 TLS 日志上报；缺凭证时 TlsLogAppender 自动跳过，仅保留本地日志
+      tls:
+        endpoint: ${TLS_ENDPOINT:}
+        region: ${TLS_REGION:}
+        topic-id: ${TLS_TOPIC_ID:}
+        access-key: ${TLS_AK:}
+        secret-key: ${TLS_SK:}
+        container: ${CONTAINER_NAME:pay-payment}
+        env: ${ENV:prod}
+        version: ${TLS_VERSION:}
+      mq:
+        vender: rocketMQ
+    rocketmq:
+      name-server: ${ROCKETMQ_NAMESRV:rocketmq-namesrv:9876}
+      producer:
+        group: PID_BLUE_WHALE_PAY_PAYMENT
+        access-key: ${ROCKETMQ_ACCESS_KEY}
+        secret-key: ${ROCKETMQ_SECRET_KEY}
+        send-message-timeout: 10000
+        retry-times-when-send-failed: 2
+        retry-times-when-send-async-failed: 2
+      consumer:
+        access-key: ${ROCKETMQ_ACCESS_KEY}
+        secret-key: ${ROCKETMQ_SECRET_KEY}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pay-payment
+  namespace: default
+  labels:
+    app: pay-payment
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # 滚动期新旧 Pod 短暂并存，补单任务有极小窗口双跑；彻底消除需加分布式锁
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: pay-payment
+  template:
+    metadata:
+      labels:
+        app: pay-payment
+    spec:
+      terminationGracePeriodSeconds: 45
+      imagePullSecrets:
+      - name: ccr-secret
+      containers:
+      - name: pay-payment
+        # 流水线固定推 latest：必须配 Always，否则节点缓存的旧镜像不会被替换。
+        # 生产建议改用固定版本号（如 v1.0.0-20261104），那时可改回 IfNotPresent
+        image: "xf-bluewhale-cn-beijing.cr.volces.com/bluewhale/blue_whale_pay_payment:latest"
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 9216
+          protocol: TCP
+        env:
+        # 容器感知堆上限，避免 JVM 按宿主内存而非 limit 分配
+        - name: JAVA_TOOL_OPTIONS
+          value: "-XX:MaxRAMPercentage=75"
+        - name: TZ
+          value: Asia/Shanghai
+        - name: CONTAINER_NAME
+          value: "pay-payment"
+        - name: ENV
+          value: "prod"
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: DB_HOST}
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: DB_PORT}
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: DB_NAME}
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: DB_USERNAME}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: DB_PASSWORD}
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: REDIS_HOST}
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: REDIS_PORT}
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: REDIS_PASSWORD}
+        - name: ROCKETMQ_NAMESRV
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: ROCKETMQ_NAMESRV}
+        - name: ROCKETMQ_ACCESS_KEY
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: ROCKETMQ_ACCESS_KEY}
+        - name: ROCKETMQ_SECRET_KEY
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: ROCKETMQ_SECRET_KEY}
+        - name: TOS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_ACCESS_KEY}
+        - name: TOS_SECRET_KEY
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_SECRET_KEY}
+        # TLS 日志上报为可选能力，缺 key 时不阻塞 Pod 启动
+        - name: TLS_ENDPOINT
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TLS_ENDPOINT, optional: true}
+        - name: TLS_REGION
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TLS_REGION, optional: true}
+        - name: TLS_TOPIC_ID
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TLS_TOPIC_ID, optional: true}
+        - name: TLS_AK
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TLS_AK, optional: true}
+        - name: TLS_SK
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TLS_SK, optional: true}
+        volumeMounts:
+        - name: config
+          mountPath: /jeepayhomes/service/app/application.yml
+          subPath: application.yml
+          readOnly: true
+        # 日志 + 渠道证书落盘目录。渠道 pfx 在首次使用时由 OSS 下载到此
+        # （ChannelCertConfigKitBean.getCertFile() 懒加载，非启动时下载）；
+        # emptyDir 表示 Pod 重建后重新下载；需持久保留则改 PVC。
+        - name: logs
+          mountPath: /jeepayhomes/service/logs
+        - name: uploads
+          mountPath: /jeepayhomes/service/uploads
+        readinessProbe:
+          tcpSocket:
+            port: 9216
+          # Spring Boot + Druid + RocketMQ 冷启动较慢
+          initialDelaySeconds: 40
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: 9216
+          initialDelaySeconds: 90
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 2Gi
+      volumes:
+      - name: config
+        configMap:
+          name: pay-payment-config
+      - name: logs
+        emptyDir: {}
+      - name: uploads
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pay-payment-svc
+  namespace: default
+spec:
+  # NodePort：银行异步通知需从集群外到达；内网互访仍可用该 Service 名
+  type: NodePort
+  selector:
+    app: pay-payment
+  ports:
+  - name: http
+    port: 9216
+    targetPort: 9216
+    nodePort: 30216
+    protocol: TCP
