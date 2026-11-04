@@ -16,6 +16,7 @@
 #        REDIS_HOST REDIS_PORT REDIS_PASSWORD
 #        ROCKETMQ_NAMESRV ROCKETMQ_ACCESS_KEY ROCKETMQ_SECRET_KEY
 #        TOS_ACCESS_KEY TOS_SECRET_KEY
+#        TOS_ENDPOINT TOS_REGION TOS_PUBLIC_BUCKET TOS_PRIVATE_BUCKET TOS_DOMAIN TOS_PREFIX
 #        MGR_JWT_SECRET
 #        TLS_ENDPOINT TLS_REGION TLS_TOPIC_ID TLS_AK TLS_SK   （缺省不影响启动）
 #   3. 集群内可达的 MySQL / Redis / RocketMQ
@@ -238,6 +239,24 @@ spec:
         - name: TOS_SECRET_KEY
           valueFrom:
             secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_SECRET_KEY}
+        - name: TOS_ENDPOINT
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_ENDPOINT}
+        - name: TOS_REGION
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_REGION}
+        - name: TOS_PUBLIC_BUCKET
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_PUBLIC_BUCKET}
+        - name: TOS_PRIVATE_BUCKET
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_PRIVATE_BUCKET}
+        - name: TOS_DOMAIN
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_DOMAIN}
+        - name: TOS_PREFIX
+          valueFrom:
+            secretKeyRef: {name: blue-whale-pay-secrets, key: TOS_PREFIX}
         # TLS 日志上报为可选能力，缺 key 时不阻塞 Pod 启动
         - name: TLS_ENDPOINT
           valueFrom:
