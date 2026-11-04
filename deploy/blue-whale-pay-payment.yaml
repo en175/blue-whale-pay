@@ -194,10 +194,10 @@ spec:
       - name: ccr-secret
       containers:
       - name: pay-payment
-        # 流水线固定推 latest：必须配 Always，否则节点缓存的旧镜像不会被替换。
-        # 生产建议改用固定版本号（如 v1.0.0-20261104），那时可改回 IfNotPresent
-        image: "xf-bluewhale-cn-beijing.cr.volces.com/bluewhale/blue_whale_pay_payment:latest"
-        imagePullPolicy: Always
+        # $(tag) 由流水线发布步骤注入（参数 image_tag），与 backend-prod 一致。
+        # 直接 kubectl apply 时需先把 $(tag) 替换成具体版本号。
+        image: "xf-bluewhale-cn-beijing.cr.volces.com/bluewhale/blue_whale_pay_payment:$(tag)"
+        imagePullPolicy: IfNotPresent
         ports:
         - name: http
           containerPort: 9216
