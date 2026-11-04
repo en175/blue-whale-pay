@@ -1,0 +1,98 @@
+# 蓝鲸支付 · 运营平台前端（pay-ui-manager，nginx :80）
+#
+# 镜像：火山 CR，由 blue_whale_pay_web/.volcano/pipeline-ui-manager.yml 构建
+#       （contextPath=blue_whale_pay_web, namespace=blue-whale,
+#         repo=blue_whale_pay_ui_manager, buildArgs PLATFORM=manager）
+#       路径前缀按兄弟仓 blue-whale-ai/deploy 的实际写法取 `bluewhale/`。
+#
+# nginx 配置来源：镜像内已烘入
+#   /etc/nginx/templates/default.conf.template（来自 blue_whale_pay_web/default.conf.template）
+#   nginx:alpine 官方 entrypoint 会用 envsubst 把 $BACKEND_HOST 替换成环境变量值，
+#   生成 /etc/nginx/conf.d/default.conf。
+#   ⚠️ 不要用 emptyDir 挂 /etc/nginx/templates —— 会覆盖镜像里的模板，
+#      生成出的 default.conf 变空，容器起不来或 404。确需改配置时把模板内容
+#      放进 ConfigMap 再挂载。
+#
+# apply 前置条件：
+#   1. Secret ccr-secret
+#   2. 后端 Service pay-manager-svc 已存在
+#
+# 前端 3 个端口的对应关系（其余两个不在本次范围）：
+#   ui-manager  9227 → 后端 9217     ui-cashier 9226 → 后端 9216
+#   ui-merchant 9228 → 后端 9218
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pay-ui-manager
+  namespace: default
+  labels:
+    app: pay-ui-manager
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: pay-ui-manager
+  template:
+    metadata:
+      labels:
+        app: pay-ui-manager
+    spec:
+      imagePullSecrets:
+      - name: ccr-secret
+      containers:
+      - name: pay-ui-manager
+        # 流水线固定推 latest：必须配 Always，否则节点缓存的旧镜像不会被替换。
+        # 生产建议改用固定版本号（如 v1.0.0-20261104），那时可改回 IfNotPresent
+        image: "xf-bluewhale-cn-beijing.cr.volces.com/bluewhale/blue_whale_pay_ui_manager:latest"
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        env:
+        # nginx 反代目标：location /api/ → proxy_pass http://$BACKEND_HOST
+        - name: BACKEND_HOST
+          value: "pay-manager-svc:9217"
+        readinessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pay-ui-svc
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: pay-ui-manager
+  ports:
+  - name: http
+    port: 9227
+    targetPort: 80
+    nodePort: 30227
+    protocol: TCP
